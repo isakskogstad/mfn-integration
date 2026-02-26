@@ -2207,21 +2207,25 @@
         if (lang) items = items.filter((i) => i.properties?.lang === lang);
         if (type) items = items.filter((i) => i.properties?.type === type);
 
-        // Deduplicate by group_id — prefer Swedish version
+        // Deduplicate sv/en pairs — prefer Swedish version
+        // group_id is NOT shared between language versions, so we key on
+        // entity_id + publish_date which IS identical for sv/en pairs
         if (!lang) {
           const groups = new Map();
           for (const item of items) {
-            const gid = item.group_id || item.news_id;
-            const existing = groups.get(gid);
+            const eid = item.author?.entity_id || "";
+            const pub = item.content?.publish_date || item.published || "";
+            const key = eid && pub ? `${eid}::${pub}` : item.news_id;
+            const existing = groups.get(key);
             if (!existing) {
-              groups.set(gid, item);
+              groups.set(key, item);
             } else {
               // Prefer sv over en
               if (
                 item.properties?.lang === "sv" &&
                 existing.properties?.lang !== "sv"
               ) {
-                groups.set(gid, item);
+                groups.set(key, item);
               }
             }
           }
