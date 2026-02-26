@@ -1531,8 +1531,8 @@
                 margin: 0 0 12px;
               "
             >
-              Prenumerera p&aring; h&auml;ndelser fr&aring;n bevakade bolag
-              direkt i din kalender.
+              Prenumerera p&aring; pressmeddelanden fr&aring;n 62 bevakade
+              bolag. Kalendern uppdateras automatiskt var 30:e minut.
             </p>
             <div
               style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px"
@@ -4003,139 +4003,62 @@
       }
 
       function copyWebcalUrl() {
-        // For static site: generate a data URI webcal approach
-        // Since we're on GitHub Pages, point to the raw .ics on Pages
-        const pagesBase = "https://isakskogstad.github.io/mfn-integration";
-        const webcalUrl = pagesBase + "/feed.ics";
-
-        // Generate and save the .ics as a downloadable file for reference
-        const ics = buildICSContent();
-        if (!ics) {
-          setCalendarStatus(
-            "Inga h\u00e4ndelser att exportera. Ladda fl\u00f6det f\u00f6rst.",
-            true,
-          );
-          return;
-        }
-
-        // Copy the webcal URL
-        const webcal = webcalUrl.replace("https://", "webcal://");
         navigator.clipboard
-          .writeText(webcal)
+          .writeText(FEED_WEBCAL_URL)
           .then(() => {
             setCalendarStatus(
-              'Kopierade webcal-l\u00e4nk! Klistra in i din kalenderapp.<br><code style="font-size:0.75rem;word-break:break-all;">' +
-                esc(webcal) +
+              'Kopierade webcal-l\u00e4nk!<br><code style="font-family:var(--font-mono);font-size:0.7rem;word-break:break-all;">' +
+                esc(FEED_WEBCAL_URL) +
                 "</code><br><br>" +
-                '<span style="opacity:0.7;">Tips: F\u00f6r engångsimport, ladda ner .ics-filen ist\u00e4llet.</span>',
+                '<span style="opacity:0.7;">Klistra in i valfri kalenderapp f\u00f6r automatisk prenumeration.</span>',
             );
           })
           .catch(() => {
-            // Fallback: show URL to copy manually
             setCalendarStatus(
-              'Kopiera denna l\u00e4nk manuellt:<br><code style="font-size:0.75rem;word-break:break-all;user-select:all;">' +
-                esc(webcal) +
+              'Kopiera denna l\u00e4nk manuellt:<br><code style="font-family:var(--font-mono);font-size:0.7rem;word-break:break-all;user-select:all;">' +
+                esc(FEED_WEBCAL_URL) +
                 "</code>",
             );
           });
       }
 
-      function openGoogleCalSubscribe() {
-        const ics = buildICSContent();
-        if (!ics) {
-          setCalendarStatus(
-            "Inga h\u00e4ndelser att exportera. Ladda fl\u00f6det f\u00f6rst.",
-            true,
-          );
-          return;
-        }
+      // Public feed.ics URL (updated every 30 min by GitHub Actions)
+      const FEED_ICS_URL =
+        "https://isakskogstad.github.io/mfn-integration/feed.ics";
+      const FEED_WEBCAL_URL = FEED_ICS_URL.replace("https://", "webcal://");
 
-        // Google Calendar: import via URL or use individual event links
-        // For bulk: download .ics and import manually (Google doesn't support webcal from arbitrary URLs easily)
-        // For convenience: open Google Calendar import page
-        const items = currentFeedItems.length ? currentFeedItems : allFeedItems;
-        if (items.length <= 5) {
-          // Few items: open Google Calendar "add event" for each
-          for (const item of items) {
-            const title = item.content?.title || item.title || "";
-            const pubDate = item.content?.publish_date || item.published || "";
-            const d = toICSDateOnly(pubDate);
-            if (!d) continue;
-            const url =
-              "https://calendar.google.com/calendar/render?action=TEMPLATE" +
-              "&text=" +
-              encodeURIComponent(title) +
-              "&dates=" +
-              toICSDate(pubDate) +
-              "/" +
-              toICSDate(
-                new Date(new Date(pubDate).getTime() + 3600000).toISOString(),
-              ) +
-              "&details=" +
-              encodeURIComponent(
-                (item.content?.preamble || "") + "\n\n" + (item.url || ""),
-              ) +
-              "&location=" +
-              encodeURIComponent(item.author?.name || "");
-            window.open(url, "_blank");
-            break; // Open just the first one to avoid popup spam
-          }
-          setCalendarStatus(
-            "Öppnade Google Calendar. F\u00f6r fler h\u00e4ndelser, ladda ner .ics och importera via Google Calendar-inst\u00e4llningar.",
-          );
-        } else {
-          // Many items: download .ics and instruct to import
-          downloadICS();
-          setCalendarStatus(
-            `${items.length} h\u00e4ndelser exporterade som .ics.<br>` +
-              '<a href="https://calendar.google.com/calendar/r/settings/export" target="_blank" rel="noopener" style="color:var(--accent);">Öppna Google Calendar Import</a> och ladda upp filen d\u00e4r.',
-          );
-        }
+      function openGoogleCalSubscribe() {
+        // Google Calendar: subscribe by URL (auto-updates)
+        const gcalUrl =
+          "https://calendar.google.com/calendar/r?cid=" +
+          encodeURIComponent(FEED_WEBCAL_URL);
+        window.open(gcalUrl, "_blank");
+        setCalendarStatus(
+          "Google Calendar prenumeration \u00f6ppnades.<br>" +
+            '<span style="opacity:0.7;">Kalendern uppdateras automatiskt var 30:e minut med nya h\u00e4ndelser.</span>',
+        );
       }
 
       function openOutlookCalSubscribe() {
-        const ics = buildICSContent();
-        if (!ics) {
-          setCalendarStatus(
-            "Inga h\u00e4ndelser att exportera. Ladda fl\u00f6det f\u00f6rst.",
-            true,
-          );
-          return;
-        }
-        // Download .ics which Outlook can open directly
-        downloadICS();
+        // Outlook.com: subscribe by URL
+        const outlookUrl =
+          "https://outlook.live.com/calendar/0/addfromweb?url=" +
+          encodeURIComponent(FEED_ICS_URL) +
+          "&name=" +
+          encodeURIComponent("MFN Bevakade Bolag");
+        window.open(outlookUrl, "_blank");
         setCalendarStatus(
-          "Öppna den nedladdade .ics-filen med Outlook f\u00f6r att importera alla h\u00e4ndelser.<br>" +
-            '<span style="opacity:0.7;">Outlook \u00f6ppnar filen automatiskt om det \u00e4r standardapp f\u00f6r .ics.</span>',
+          "Outlook prenumeration \u00f6ppnades.<br>" +
+            '<span style="opacity:0.7;">Kalendern uppdateras automatiskt med nya h\u00e4ndelser.</span>',
         );
       }
 
       function openAppleCalSubscribe() {
-        const ics = buildICSContent();
-        if (!ics) {
-          setCalendarStatus(
-            "Inga h\u00e4ndelser att exportera. Ladda fl\u00f6det f\u00f6rst.",
-            true,
-          );
-          return;
-        }
-        // Apple Calendar: use webcal:// protocol or download .ics
-        // Create a blob URL and try to open via webcal protocol
-        const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
-        const blobUrl = URL.createObjectURL(blob);
-
-        // Try webcal protocol first (works on macOS/iOS)
-        const a = document.createElement("a");
-        a.href = blobUrl;
-        a.download = ICS_FILENAME;
-        a.click();
-        URL.revokeObjectURL(blobUrl);
-
-        const itemCount = currentFeedItems.length || allFeedItems.length;
+        // Apple Calendar (macOS/iOS): webcal:// protocol triggers native subscription
+        window.location.href = FEED_WEBCAL_URL;
         setCalendarStatus(
-          `Laddade ner ${itemCount} h\u00e4ndelser.<br>` +
-            '<span style="opacity:0.7;">Dubbelklicka p\u00e5 filen f\u00f6r att \u00f6ppna i Apple Calendar. ' +
-            'V\u00e4lj "L\u00e4gg till alla" f\u00f6r att importera.</span>',
+          "Apple Calendar prenumeration startades.<br>" +
+            '<span style="opacity:0.7;">V\u00e4lj "Prenumerera" i dialogen. Kalendern uppdateras automatiskt.</span>',
         );
       }
 
