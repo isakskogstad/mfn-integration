@@ -1130,6 +1130,65 @@
           </div>
         </div>
 
+        <!-- Kalender -->
+        <div class="panel" id="panel-calendar">
+          <div class="panel-header" onclick="togglePanel('panel-calendar')">
+            <h3>&#128197; Kalender</h3>
+            <span class="panel-chevron">&#9660;</span>
+          </div>
+          <div class="panel-body">
+            <p
+              style="
+                font-size: 0.82rem;
+                color: var(--text-muted);
+                margin: 0 0 10px;
+              "
+            >
+              Prenumerera p&aring; h&auml;ndelser fr&aring;n bevakade bolag i
+              din kalender.
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 8px">
+              <button
+                class="btn btn-sm"
+                onclick="downloadICS()"
+                style="width: 100%"
+              >
+                &#128229; Ladda ner .ics-fil
+              </button>
+              <button
+                class="btn btn-sm"
+                onclick="copyWebcalUrl()"
+                style="width: 100%"
+              >
+                &#128279; Kopiera prenumerationsl&auml;nk
+              </button>
+              <button
+                class="btn btn-sm"
+                onclick="openGoogleCalSubscribe()"
+                style="width: 100%"
+              >
+                &#128197; L&auml;gg till i Google Calendar
+              </button>
+              <button
+                class="btn btn-sm"
+                onclick="openOutlookCalSubscribe()"
+                style="width: 100%"
+              >
+                &#128231; L&auml;gg till i Outlook
+              </button>
+            </div>
+            <div
+              id="calendar-status"
+              style="
+                margin-top: 8px;
+                font-size: 0.8rem;
+                color: var(--text-muted);
+              "
+            ></div>
+            <div id="calendar-events-preview" style="margin-top: 10px"></div>
+          </div>
+        </div>
+
         <!-- Entiteter -->
         <div class="panel" id="panel-entities">
           <div class="panel-header" onclick="togglePanel('panel-entities')">
@@ -3257,6 +3316,275 @@
           btn.disabled = false;
           btn.textContent = "H\u00e4mta alla entiteter";
         }
+      }
+
+      // =============================================================================
+      // CALENDAR (iCal) FUNCTIONS
+      // =============================================================================
+
+      const ICS_FILENAME = "mfn-bevakade-bolag.ics";
+
+      function icsEscape(str) {
+        return (str || "")
+          .replace(/\\/g, "\\\\")
+          .replace(/;/g, "\\;")
+          .replace(/,/g, "\\,")
+          .replace(/\n/g, "\\n");
+      }
+
+      function toICSDate(dateStr) {
+        // Convert ISO date to iCal format: 20260226T110637Z
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return null;
+        return d
+          .toISOString()
+          .replace(/[-:]/g, "")
+          .replace(/\.\d{3}/, "");
+      }
+
+      function toICSDateOnly(dateStr) {
+        // VALUE=DATE format: 20260226
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return null;
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${y}${m}${day}`;
+      }
+
+      function foldLine(line) {
+        // iCal lines must be max 75 octets; fold with CRLF + space
+        const parts = [];
+        while (line.length > 75) {
+          parts.push(line.substring(0, 75));
+          line = " " + line.substring(75);
+        }
+        parts.push(line);
+        return parts.join("\r\n");
+      }
+
+      function buildICSContent() {
+        const items = currentFeedItems.length ? currentFeedItems : allFeedItems;
+        if (!items.length) return null;
+
+        const lines = [
+          "BEGIN:VCALENDAR",
+          "VERSION:2.0",
+          "PRODID:-//MFN Explorer//Bevakade Bolag//SV",
+          "CALSCALE:GREGORIAN",
+          "METHOD:PUBLISH",
+          "X-WR-CALNAME:MFN Bevakade Bolag",
+          "X-WR-CALDESC:Pressmeddelanden och h\u00e4ndelser fr\u00e5n bevakade bolag p\u00e5 MFN",
+        ];
+
+        for (const item of items) {
+          const pubDate = item.content?.publish_date || item.published || "";
+          const dtStart = toICSDate(pubDate);
+          if (!dtStart) continue;
+
+          const title = item.content?.title || item.title || "MFN-nyhet";
+          const company = item.author?.name || "";
+          const url = item.url || "";
+          const preamble = item.content?.preamble || "";
+          const tags = (item.properties?.tags || [])
+            .map((t) => TAG_LABELS[t] || t.replace(/^[:]/, ""))
+            .join(", ");
+          const uid = (item.news_id || Math.random().toString(36)) + "@mfn.se";
+
+          // Description: company + preamble + tags
+          let desc = "";
+          if (company) desc += company + "\\n\\n";
+          if (preamble) desc += icsEscape(preamble) + "\\n\\n";
+          if (tags) desc += "Taggar: " + icsEscape(tags) + "\\n";
+          if (url) desc += "\\nL\u00e4s mer: " + url;
+
+          // Build end time: 1 hour after start
+          const startDate = new Date(pubDate);
+          const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
+          const dtEnd = endDate
+            .toISOString()
+            .replace(/[-:]/g, "")
+            .replace(/\.\d{3}/, "");
+
+          lines.push("BEGIN:VEVENT");
+          lines.push(foldLine("UID:" + uid));
+          lines.push("DTSTART:" + dtStart);
+          lines.push("DTEND:" + dtEnd);
+          lines.push(
+            "DTSTAMP:" +
+              new Date()
+                .toISOString()
+                .replace(/[-:]/g, "")
+                .replace(/\.\d{3}/, ""),
+          );
+          lines.push(foldLine("SUMMARY:" + icsEscape(title)));
+          if (desc) lines.push(foldLine("DESCRIPTION:" + desc));
+          if (url) lines.push(foldLine("URL:" + url));
+          if (company)
+            lines.push(
+              foldLine(
+                "ORGANIZER;CN=" + icsEscape(company) + ":MAILTO:noreply@mfn.se",
+              ),
+            );
+
+          // Categories from tags
+          const isReg = (item.properties?.tags || []).includes(":regulatory");
+          if (isReg) lines.push("CATEGORIES:Regulatorisk");
+          const reportTag = (item.properties?.tags || []).find((t) =>
+            t.startsWith("sub:report"),
+          );
+          if (reportTag) lines.push("CATEGORIES:Rapport");
+
+          lines.push("STATUS:CONFIRMED");
+          lines.push("TRANSP:TRANSPARENT");
+          lines.push("END:VEVENT");
+        }
+
+        lines.push("END:VCALENDAR");
+        return lines.join("\r\n");
+      }
+
+      function downloadICS() {
+        const ics = buildICSContent();
+        if (!ics) {
+          setCalendarStatus(
+            "Inga h\u00e4ndelser att exportera. Ladda flödet först.",
+            true,
+          );
+          return;
+        }
+        const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = ICS_FILENAME;
+        a.click();
+        URL.revokeObjectURL(url);
+        setCalendarStatus(
+          `Laddade ner ${currentFeedItems.length || allFeedItems.length} h\u00e4ndelser som .ics`,
+        );
+      }
+
+      function getICSBlobUrl() {
+        const ics = buildICSContent();
+        if (!ics) return null;
+        return URL.createObjectURL(
+          new Blob([ics], { type: "text/calendar;charset=utf-8" }),
+        );
+      }
+
+      function copyWebcalUrl() {
+        // For static site: generate a data URI webcal approach
+        // Since we're on GitHub Pages, point to the raw .ics on Pages
+        const pagesBase = "https://isakskogstad.github.io/mfn-integration";
+        const webcalUrl = pagesBase + "/feed.ics";
+
+        // Generate and save the .ics as a downloadable file for reference
+        const ics = buildICSContent();
+        if (!ics) {
+          setCalendarStatus(
+            "Inga h\u00e4ndelser att exportera. Ladda fl\u00f6det f\u00f6rst.",
+            true,
+          );
+          return;
+        }
+
+        // Copy the webcal URL
+        const webcal = webcalUrl.replace("https://", "webcal://");
+        navigator.clipboard
+          .writeText(webcal)
+          .then(() => {
+            setCalendarStatus(
+              'Kopierade webcal-l\u00e4nk! Klistra in i din kalenderapp.<br><code style="font-size:0.75rem;word-break:break-all;">' +
+                esc(webcal) +
+                "</code><br><br>" +
+                '<span style="opacity:0.7;">Tips: F\u00f6r engångsimport, ladda ner .ics-filen ist\u00e4llet.</span>',
+            );
+          })
+          .catch(() => {
+            // Fallback: show URL to copy manually
+            setCalendarStatus(
+              'Kopiera denna l\u00e4nk manuellt:<br><code style="font-size:0.75rem;word-break:break-all;user-select:all;">' +
+                esc(webcal) +
+                "</code>",
+            );
+          });
+      }
+
+      function openGoogleCalSubscribe() {
+        const ics = buildICSContent();
+        if (!ics) {
+          setCalendarStatus(
+            "Inga h\u00e4ndelser att exportera. Ladda fl\u00f6det f\u00f6rst.",
+            true,
+          );
+          return;
+        }
+
+        // Google Calendar: import via URL or use individual event links
+        // For bulk: download .ics and import manually (Google doesn't support webcal from arbitrary URLs easily)
+        // For convenience: open Google Calendar import page
+        const items = currentFeedItems.length ? currentFeedItems : allFeedItems;
+        if (items.length <= 5) {
+          // Few items: open Google Calendar "add event" for each
+          for (const item of items) {
+            const title = item.content?.title || item.title || "";
+            const pubDate = item.content?.publish_date || item.published || "";
+            const d = toICSDateOnly(pubDate);
+            if (!d) continue;
+            const url =
+              "https://calendar.google.com/calendar/render?action=TEMPLATE" +
+              "&text=" +
+              encodeURIComponent(title) +
+              "&dates=" +
+              toICSDate(pubDate) +
+              "/" +
+              toICSDate(
+                new Date(new Date(pubDate).getTime() + 3600000).toISOString(),
+              ) +
+              "&details=" +
+              encodeURIComponent(
+                (item.content?.preamble || "") + "\n\n" + (item.url || ""),
+              ) +
+              "&location=" +
+              encodeURIComponent(item.author?.name || "");
+            window.open(url, "_blank");
+            break; // Open just the first one to avoid popup spam
+          }
+          setCalendarStatus(
+            "Öppnade Google Calendar. F\u00f6r fler h\u00e4ndelser, ladda ner .ics och importera via Google Calendar-inst\u00e4llningar.",
+          );
+        } else {
+          // Many items: download .ics and instruct to import
+          downloadICS();
+          setCalendarStatus(
+            `${items.length} h\u00e4ndelser exporterade som .ics.<br>` +
+              '<a href="https://calendar.google.com/calendar/r/settings/export" target="_blank" rel="noopener" style="color:var(--accent);">Öppna Google Calendar Import</a> och ladda upp filen d\u00e4r.',
+          );
+        }
+      }
+
+      function openOutlookCalSubscribe() {
+        const ics = buildICSContent();
+        if (!ics) {
+          setCalendarStatus(
+            "Inga h\u00e4ndelser att exportera. Ladda fl\u00f6det f\u00f6rst.",
+            true,
+          );
+          return;
+        }
+        // Download .ics which Outlook can open directly
+        downloadICS();
+        setCalendarStatus(
+          "Öppna den nedladdade .ics-filen med Outlook f\u00f6r att importera alla h\u00e4ndelser.<br>" +
+            '<span style="opacity:0.7;">Outlook \u00f6ppnar filen automatiskt om det \u00e4r standardapp f\u00f6r .ics.</span>',
+        );
+      }
+
+      function setCalendarStatus(html, isError) {
+        const el = document.getElementById("calendar-status");
+        el.innerHTML = html;
+        el.style.color = isError ? "var(--danger)" : "var(--text-muted)";
       }
 
       function generateFeedUrls() {
