@@ -472,7 +472,7 @@
 
       /* ---- NEWS ITEM ---- */
       .news-item {
-        margin-bottom: 12px;
+        margin-bottom: 16px;
       }
       .news-item .news-header {
         display: flex;
@@ -481,16 +481,17 @@
       }
       .news-item .news-meta {
         display: flex;
-        gap: 8px;
+        gap: 6px;
         align-items: center;
         flex-wrap: wrap;
         margin-top: 6px;
       }
       .news-item .news-title {
-        font-size: 15px;
+        font-size: 16px;
         font-weight: 600;
         color: var(--text-heading);
         margin-bottom: 4px;
+        line-height: 1.35;
       }
       .news-item .news-company {
         font-size: 13px;
@@ -500,49 +501,142 @@
         font-size: 12px;
         color: var(--text-muted);
       }
-      .news-expanded {
-        margin-top: 16px;
-        padding-top: 16px;
-        border-top: 1px solid var(--border);
-      }
-      .news-expanded .preamble {
+
+      /* Preamble shown below header */
+      .news-item .news-preamble {
         font-size: 14px;
         color: var(--text);
-        line-height: 1.7;
-        margin-bottom: 12px;
+        line-height: 1.6;
+        margin-top: 10px;
         font-style: italic;
+        border-left: 3px solid var(--accent);
+        padding-left: 12px;
       }
-      .news-expanded .body-content {
-        font-size: 14px;
-        line-height: 1.7;
+
+      /* Full body content */
+      .news-item .news-body {
+        margin-top: 12px;
+        font-size: 13.5px;
+        line-height: 1.65;
         color: var(--text-muted);
+        overflow: hidden;
       }
-      .news-expanded .body-content strong {
+      .news-item .news-body p {
+        margin-bottom: 8px;
+      }
+      .news-item .news-body strong,
+      .news-item .news-body b {
         color: var(--text);
       }
-      .news-expanded .attachments {
-        margin-top: 12px;
+      .news-item .news-body a {
+        color: var(--accent);
+        text-decoration: none;
       }
-      .news-expanded .attachment-link {
+      .news-item .news-body a:hover {
+        text-decoration: underline;
+      }
+      .news-item .news-body table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+        margin: 8px 0;
+      }
+      .news-item .news-body table td,
+      .news-item .news-body table th {
+        padding: 4px 8px;
+        border: 1px solid var(--border);
+        text-align: left;
+      }
+      .news-item .news-body table th {
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text);
+      }
+      .news-item .news-body img {
+        max-width: 100%;
+        border-radius: var(--radius);
+        margin: 8px 0;
+      }
+      .news-item .news-body ul,
+      .news-item .news-body ol {
+        margin: 6px 0 6px 20px;
+      }
+      .news-item .news-body h1,
+      .news-item .news-body h2,
+      .news-item .news-body h3 {
+        color: var(--text-heading);
+        font-size: 14px;
+        margin: 12px 0 4px;
+      }
+
+      /* Collapsible body */
+      .news-item .news-body.collapsed {
+        max-height: 300px;
+        position: relative;
+      }
+      .news-item .news-body.collapsed::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 80px;
+        background: linear-gradient(transparent, var(--bg-card));
+        pointer-events: none;
+      }
+      .news-item .news-body.expanded {
+        max-height: none;
+      }
+      .news-toggle {
+        display: inline-block;
+        margin-top: 8px;
+        font-size: 13px;
+        color: var(--accent);
+        cursor: pointer;
+        font-weight: 500;
+      }
+      .news-toggle:hover {
+        text-decoration: underline;
+      }
+
+      /* Attachments row */
+      .news-attachments {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      .att-chip {
         display: inline-flex;
         align-items: center;
         gap: 6px;
         background: rgba(255, 255, 255, 0.05);
-        padding: 8px 12px;
+        padding: 6px 12px;
         border-radius: var(--radius);
         color: var(--accent);
         text-decoration: none;
-        font-size: 13px;
-        margin-right: 8px;
-        margin-bottom: 8px;
+        font-size: 12px;
         transition: background var(--transition);
+        max-width: 300px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
-      .news-expanded .attachment-link:hover {
+      .att-chip:hover {
         background: rgba(255, 255, 255, 0.1);
+      }
+      .att-chip .att-icon {
+        flex-shrink: 0;
       }
 
       .news-regulatory {
         border-left: 3px solid var(--yellow);
+      }
+
+      /* MFN footer sections - hide in feed */
+      .news-body .mfn-footer {
+        display: none;
       }
 
       /* ---- FILTER BAR ---- */
@@ -2275,7 +2369,7 @@
         currentOffset = 0;
         try {
           const res = await mfnFetch(
-            `https://mfn.se/all/a/${slug}.json?limit=20`,
+            `https://mfn.se/all/a/${slug}.json?limit=20&compact=true`,
           );
           const data = await res.json();
           allFeedItems = data.items || [];
@@ -2330,7 +2424,7 @@
         let attempts = 0;
         while (allFeedItems.length < targetCount && attempts < 8) {
           const res = await mfnFetch(
-            `https://mfn.se/all/s/nordic.json?limit=100&offset=${watchedOffset}&compact=true`,
+            `https://mfn.se/all/s/nordic.json?limit=100&compact=true&offset=${watchedOffset}`,
           );
           const data = await res.json();
           const items = data.items || [];
@@ -2389,8 +2483,8 @@
         }
         const slug = currentFeedSlug;
         const url = slug
-          ? `https://mfn.se/all/a/${slug}.json?limit=20&offset=${currentOffset}`
-          : `https://mfn.se/all/s/nordic.json?limit=20&offset=${currentOffset}&compact=true`;
+          ? `https://mfn.se/all/a/${slug}.json?limit=20&compact=true&offset=${currentOffset}`
+          : `https://mfn.se/all/s/nordic.json?limit=20&compact=true&offset=${currentOffset}`;
         try {
           const res = await mfnFetch(url);
           const data = await res.json();
@@ -2501,133 +2595,146 @@
             const title = item.content?.title || item.title || "";
             const pubDate = item.content?.publish_date || item.published || "";
             const preamble = item.content?.preamble || "";
+            const hasFulltext = !!(item.content?.html || item.content?.text);
             const isExpanded = expandedNewsId === item.news_id;
+
+            // Preamble (always shown as preview)
+            let preambleHtml = "";
+            if (preamble) {
+              preambleHtml = `<div class="news-preamble">${esc(preamble)}</div>`;
+            }
+
+            // Expand container (fulltext loaded on demand)
+            const expandId = `news-expand-${item.news_id}`;
+            let expandContent = "";
+            if (isExpanded && hasFulltext) {
+              expandContent = renderFulltextContent(item);
+            }
+
             return `
-      <div class="card card-clickable news-item ${
-        isReg ? "news-regulatory" : ""
-      }" style="margin-bottom:12px;cursor:pointer;" onclick="toggleNewsItem('${
-        item.news_id
-      }', ${idx})">
-        <div class="news-header">
+      <div class="card news-item ${isReg ? "news-regulatory" : ""}" style="margin-bottom:12px;">
+        <div class="news-header" style="cursor:pointer;" onclick="toggleNewsBody('${item.news_id}', ${idx})">
           ${logoHtml}
           <div style="flex:1;min-width:0;">
             <div class="news-title">${esc(title)}</div>
-            ${preamble ? `<div style="color:var(--text-muted);font-size:0.85rem;margin:4px 0 6px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${esc(preamble)}</div>` : ""}
             <div class="news-meta">
               <span class="news-company">${esc(author.name || "")}</span>
               <span class="news-date">${formatRelativeDate(pubDate)}</span>
-              <span class="badge ${
-                lang === "sv" ? "badge-blue" : "badge-green"
-              }">${esc(lang.toUpperCase())}</span>
-              ${
-                isReg
-                  ? '<span class="badge badge-yellow">REGULATORISK</span>'
-                  : ""
-              }
+              <span class="badge ${lang === "sv" ? "badge-blue" : "badge-green"}">${esc(lang.toUpperCase())}</span>
+              ${isReg ? '<span class="badge badge-yellow">REGULATORISK</span>' : ""}
               ${tags}
             </div>
           </div>
         </div>
-        <div id="news-expand-${item.news_id}" style="display:${
-          isExpanded ? "block" : "none"
-        };">
-          ${isExpanded ? renderExpandedNews(item) : ""}
-        </div>
+        ${preambleHtml}
+        <div id="${expandId}" style="display:${isExpanded ? "block" : "none"};">${expandContent}</div>
+        <button class="news-toggle" id="news-toggle-${item.news_id}" onclick="event.stopPropagation(); toggleNewsBody('${item.news_id}', ${idx})">Visa mer \u25BC</button>
       </div>`;
           })
           .join("");
       }
 
-      async function toggleNewsItem(newsId, idx) {
+      function renderFulltextContent(item) {
+        const content = item.content || {};
+        let html = "";
+
+        // Body HTML
+        if (content.html) {
+          html += `<div class="news-body">${content.html}</div>`;
+        } else if (content.text) {
+          html += `<div class="news-body" style="white-space:pre-wrap;">${esc(content.text)}</div>`;
+        }
+
+        // Attachments
+        const attachments = content.attachments || [];
+        if (attachments.length) {
+          const chips = attachments
+            .map((a) => {
+              const url = a.url || "";
+              const fname =
+                a.file_title || a.title || url.split("/").pop() || "Bilaga";
+              const ext = url.split(".").pop().toLowerCase();
+              let icon = "\uD83D\uDCCE";
+              if (ext === "pdf") icon = "\uD83D\uDCC4";
+              else if (
+                ["png", "jpg", "jpeg", "gif", "svg", "webp"].includes(ext)
+              )
+                icon = "\uD83D\uDDBC\uFE0F";
+              else if (["xls", "xlsx", "csv"].includes(ext))
+                icon = "\uD83D\uDCCA";
+              const ct = a.content_type || "";
+              const sizeTag = ct
+                ? `<span style="opacity:0.5;font-size:0.7rem;margin-left:4px;">${ct.split("/").pop()}</span>`
+                : "";
+              return `<a class="att-chip" href="${esc(url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()"><span class="att-icon">${icon}</span>${esc(fname)}${sizeTag}</a>`;
+            })
+            .join("");
+          html += `<div class="news-attachments">${chips}</div>`;
+        }
+
+        // Extract button
+        if (content.html) {
+          html += `<div style="margin-top:8px;"><button class="btn btn-sm btn-secondary" style="font-size:0.75rem;" onclick="event.stopPropagation(); selectedNewsForExtraction = currentFeedItems.find(i=>i.news_id==='${item.news_id}'); extractFromCurrent()">Extrahera kontakter</button></div>`;
+        }
+
+        return html;
+      }
+
+      async function toggleNewsBody(newsId, idx) {
+        const expandEl = document.getElementById("news-expand-" + newsId);
+        const toggle = document.getElementById("news-toggle-" + newsId);
+        if (!expandEl) return;
+
+        // If already expanded, collapse
         if (expandedNewsId === newsId) {
+          expandEl.style.display = "none";
+          if (toggle) {
+            toggle.textContent = "Visa mer \u25BC";
+            toggle.style.display = "";
+          }
           expandedNewsId = null;
-          const el = document.getElementById("news-expand-" + newsId);
-          if (el) el.style.display = "none";
           return;
         }
+
         expandedNewsId = newsId;
         const item = currentFeedItems[idx];
-        const el = document.getElementById("news-expand-" + newsId);
 
-        // If compact (no content.html), fetch the full version
-        if (
-          item &&
-          (!item.content || !item.content.html) &&
-          item.author?.slug
-        ) {
-          el.innerHTML =
-            '<div class="loading-center" style="padding:20px;"><div class="spinner"></div><span>Laddar inneh\u00e5ll...</span></div>';
-          el.style.display = "block";
+        // If no fulltext yet, fetch it on demand
+        if (item && (!item.content || !item.content.html)) {
+          expandEl.innerHTML =
+            '<div style="padding:16px;text-align:center;"><div class="spinner"></div><span style="margin-left:8px;color:var(--text-muted);font-size:0.85rem;">Laddar inneh\u00e5ll...</span></div>';
+          expandEl.style.display = "block";
+          if (toggle) toggle.style.display = "none";
           try {
-            const slug = item.author.slug;
-            // Fetch the single news item via the company feed (not compact)
-            const res = await mfnFetch(
-              `https://mfn.se/all/a/${slug}.json?limit=1&query=${encodeURIComponent(
-                item.title,
-              )}`,
-            );
-            {
+            // Fetch fulltext via company feed (without compact)
+            const slug = item.author?.slug;
+            if (slug) {
+              const res = await mfnFetch(
+                `https://mfn.se/all/a/${slug}.json?limit=10`,
+              );
               const data = await res.json();
               const found = (data.items || []).find(
                 (i) => i.news_id === newsId,
               );
-              if (found) {
-                Object.assign(item, found);
+              if (found && found.content) {
+                item.content = { ...item.content, ...found.content };
               }
             }
           } catch (e) {
-            /* ignore, render what we have */
+            console.warn("Failed to fetch fulltext:", e);
           }
         }
 
-        if (el) {
-          el.innerHTML = renderExpandedNews(item);
-          el.style.display = "block";
+        // Render fulltext
+        expandEl.innerHTML = renderFulltextContent(item);
+        expandEl.style.display = "block";
+        if (toggle) {
+          toggle.textContent = "Visa mindre \u25B2";
+          toggle.style.display = "";
         }
-        // Store for extraction tab
+
+        // Store for extraction
         selectedNewsForExtraction = item;
-      }
-
-      function renderExpandedNews(item) {
-        if (!item) return "";
-        const content = item.content || {};
-        let html = '<div class="news-expanded">';
-
-        if (content.preamble) {
-          html += `<div class="preamble">${esc(content.preamble)}</div>`;
-        }
-
-        if (content.html) {
-          html += `<div class="body-content">${content.html}</div>`;
-        } else if (content.text) {
-          html += `<div class="body-content" style="white-space:pre-wrap;">${esc(
-            content.text,
-          )}</div>`;
-        }
-
-        const attachments = content.attachments || [];
-        if (attachments.length) {
-          html +=
-            '<div class="attachments"><strong style="font-size:13px;color:var(--text-muted);">Bilagor:</strong><br>';
-          attachments.forEach((a) => {
-            const icon = (a.url || "").endsWith(".pdf")
-              ? "&#128196;"
-              : "&#128248;";
-            html += `<a class="attachment-link" href="${esc(
-              a.url,
-            )}" target="_blank" onclick="event.stopPropagation()">${icon} ${esc(
-              a.title || a.url?.split("/").pop() || "Bilaga",
-            )}</a>`;
-          });
-          html += "</div>";
-        }
-
-        if (content.html) {
-          html += `<div class="mt"><button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); extractFromCurrent()">Extrahera kontakter</button></div>`;
-        }
-
-        html += "</div>";
-        return html;
       }
 
       function extractFromCurrent() {
