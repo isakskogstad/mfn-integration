@@ -58,10 +58,10 @@
       .app-header {
         background: var(--bg-card);
         border-bottom: 1px solid var(--border);
-        padding: 16px 24px;
+        padding: 12px 24px;
         display: flex;
         align-items: center;
-        gap: 16px;
+        justify-content: space-between;
         position: sticky;
         top: 0;
         z-index: 100;
@@ -85,6 +85,11 @@
         margin-left: 6px;
         opacity: 0.6;
       }
+      .header-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
 
       .cors-banner {
         background: var(--yellow-bg);
@@ -96,24 +101,41 @@
         display: none;
       }
 
+      /* ---- DASHBOARD GRID ---- */
+      .dashboard {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 20px;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px 24px;
+      }
+      .dashboard-main {
+        min-width: 0;
+      }
+      .dashboard-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      @media (max-width: 1024px) {
+        .dashboard {
+          grid-template-columns: 1fr;
+          padding: 16px;
+        }
+        .dashboard-sidebar {
+          order: -1;
+        }
+      }
       @media (max-width: 640px) {
         .app-header {
           flex-wrap: wrap;
           padding: 12px 16px;
+          gap: 8px;
         }
         .app-logo .subtitle {
           display: none;
-        }
-        .tab-bar {
-          order: 1;
-          width: 100%;
-        }
-        .tab-btn {
-          padding: 6px 10px;
-          font-size: 13px;
-        }
-        .tab-panel {
-          padding: 16px;
         }
         .search-row {
           flex-direction: column;
@@ -131,47 +153,52 @@
         }
       }
 
-      .tab-bar {
+      /* ---- COLLAPSIBLE PANEL ---- */
+      .panel {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+      }
+      .panel-header {
         display: flex;
-        gap: 4px;
-        flex: 1;
-        overflow-x: auto;
-      }
-      .tab-btn {
-        background: transparent;
-        border: none;
-        color: var(--text-muted);
-        padding: 8px 16px;
-        border-radius: var(--radius);
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
         cursor: pointer;
+        user-select: none;
+        transition: background var(--transition);
+      }
+      .panel-header:hover {
+        background: rgba(255, 255, 255, 0.03);
+      }
+      .panel-header h3 {
+        margin: 0;
         font-size: 14px;
-        font-weight: 500;
-        white-space: nowrap;
-        transition: all var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 8px;
       }
-      .tab-btn:hover {
-        color: var(--text);
-        background: rgba(255, 255, 255, 0.05);
+      .panel-chevron {
+        color: var(--text-muted);
+        font-size: 12px;
+        transition: transform 0.2s ease;
       }
-      .tab-btn.active {
-        color: var(--accent);
-        background: rgba(74, 108, 247, 0.1);
+      .panel.open .panel-chevron {
+        transform: rotate(180deg);
       }
-
-      .tab-panel {
+      .panel-body {
         display: none;
-        padding: 24px;
-        max-width: 1200px;
-        margin: 0 auto;
+        padding: 0 16px 16px;
       }
-      .tab-panel.active {
+      .panel.open .panel-body {
         display: block;
-        animation: fadeIn 0.2s ease;
+        animation: fadeIn 0.15s ease;
       }
       @keyframes fadeIn {
         from {
           opacity: 0;
-          transform: translateY(4px);
+          transform: translateY(-4px);
         }
         to {
           opacity: 1;
@@ -814,233 +841,272 @@
     <header class="app-header">
       <div class="app-logo">
         MFN Explorer <span class="subtitle">Nordiska pressmeddelanden</span
-        ><span class="version">v1.0</span>
+        ><span class="version">v2.0</span>
       </div>
-      <nav class="tab-bar">
-        <button class="tab-btn active" data-tab="search">S&ouml;k bolag</button>
-        <button class="tab-btn" data-tab="feed" id="tab-btn-feed">
-          Nyhetsfl&ouml;de
-        </button>
-        <button class="tab-btn" data-tab="extract">Kontaktextraktion</button>
-        <button class="tab-btn" data-tab="matches">Matchade bolag</button>
-        <button class="tab-btn" data-tab="tools">Kalender &amp; Verktyg</button>
-      </nav>
-    </header>
-    <div class="cors-banner" id="cors-banner">
-      OBS: Denna app h&auml;mtar data fr&aring;n mfn.se. Om du &ouml;ppnar filen
-      direkt fr&aring;n disk (file://) kan CORS-restriktioner blockera
-      API-anrop. Anv&auml;nd en lokal webbserver (t.ex.
-      <code>npx serve .</code> eller <code>python3 -m http.server</code>)
-      f&ouml;r full funktionalitet.
-    </div>
-
-    <!-- TAB 1: SOK BOLAG -->
-    <div id="tab-search" class="tab-panel active">
-      <h2>S&ouml;k bolag</h2>
-      <div class="search-row">
-        <input
-          type="text"
-          id="company-search"
-          placeholder="S&ouml;k p&aring; bolagsnamn, ticker eller ISIN..."
-          autofocus
-        />
-        <button class="btn" onclick="doCompanySearch()">S&ouml;k</button>
-      </div>
-      <div id="search-results"></div>
-    </div>
-
-    <!-- TAB 2: NYHETSFLODE -->
-    <div id="tab-feed" class="tab-panel">
-      <div
-        class="flex-row mb"
-        style="justify-content: space-between; flex-wrap: wrap"
-      >
-        <h2 id="feed-title" style="margin-bottom: 0">Nyhetsfl&ouml;de</h2>
-        <div class="flex-row gap-sm">
-          <button
-            class="btn btn-sm"
-            onclick="loadWatchedFeed()"
-            id="btn-watched"
-            style="background: var(--green); color: #000; font-weight: 600"
-          >
-            &#9733; Bevakade bolag
-          </button>
-          <button class="btn btn-secondary btn-sm" onclick="loadNordicFeed()">
-            Nordiskt fl&ouml;de
-          </button>
-          <button
-            class="btn btn-secondary btn-sm"
-            id="load-more-btn"
-            onclick="loadMoreNews()"
-            style="display: none"
-          >
-            Ladda fler
-          </button>
-        </div>
-      </div>
-      <div class="filter-bar">
-        <label>Spr&aring;k:</label>
-        <select id="filter-lang" onchange="applyFilters()">
-          <option value="">Alla</option>
-          <option value="sv">Svenska</option>
-          <option value="en">English</option>
-        </select>
-        <label>Typ:</label>
-        <select id="filter-type" onchange="applyFilters()">
-          <option value="">Alla</option>
-          <option value="ir">Regulatorisk (IR)</option>
-          <option value="pr">Pressmeddelande (PR)</option>
-        </select>
+      <div class="header-right">
         <span id="live-indicator" style="display: none"
           ><span class="live-badge"
             ><span class="live-dot"></span>LIVE</span
           ></span
         >
-      </div>
-      <div class="feed-search-row">
-        <input
-          type="text"
-          id="feed-search"
-          placeholder="S&ouml;k bland laddade nyheter..."
-          oninput="applyFilters()"
-        />
-      </div>
-      <div id="feed-count" class="feed-count"></div>
-      <div id="feed-results"></div>
-    </div>
-
-    <!-- TAB 3: KONTAKTEXTRAKTION -->
-    <div id="tab-extract" class="tab-panel">
-      <h2>Kontaktextraktion</h2>
-      <div id="extract-empty" class="empty-state">
-        <div class="icon">&#128196;</div>
-        <h3>Ingen nyhet vald</h3>
-        <p>
-          Klicka p&aring; en nyhet i Nyhetsfl&ouml;de-fliken f&ouml;r att
-          extrahera kontaktinformation.
-        </p>
-      </div>
-      <div id="extract-content" style="display: none"></div>
-    </div>
-
-    <!-- TAB 4: MATCHADE BOLAG -->
-    <div id="tab-matches" class="tab-panel">
-      <h2>
-        Matchade bolag <span class="badge badge-blue" id="match-count">62</span>
-      </h2>
-      <div class="search-row">
-        <input
-          type="text"
-          id="match-search"
-          placeholder="Filtrera p&aring; namn, ticker, orgnummer..."
-          oninput="filterMatches()"
-        />
-        <select
-          id="match-exchange"
-          onchange="filterMatches()"
-          style="width: auto; min-width: 140px"
-        >
-          <option value="">Alla b&ouml;rser</option>
-        </select>
-        <select
-          id="match-source"
-          onchange="filterMatches()"
-          style="width: auto; min-width: 160px"
-        >
-          <option value="">Alla k&auml;llor</option>
-          <option value="WatchedCompany">WatchedCompany</option>
-          <option value="FamilyOffice">FamilyOffice</option>
-        </select>
-      </div>
-      <div style="overflow-x: auto">
-        <table class="matches-table">
-          <thead>
-            <tr>
-              <th>DB-namn</th>
-              <th>MFN-namn</th>
-              <th>Slug</th>
-              <th>Tickers</th>
-              <th>Orgnummer</th>
-              <th>Matchtyp</th>
-              <th>K&auml;llor</th>
-            </tr>
-          </thead>
-          <tbody id="matches-tbody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- TAB 5: KALENDER & VERKTYG -->
-    <div id="tab-tools" class="tab-panel">
-      <h2>Kalender &amp; Verktyg</h2>
-
-      <div class="tool-section">
-        <h3>Entitetsr&auml;knare</h3>
-        <p class="text-sm text-muted mb">
-          H&auml;mta alla MFN-entiteter och visa statistik.
-        </p>
-        <button class="btn" id="entity-count-btn" onclick="fetchEntityCount()">
-          H&auml;mta alla entiteter
-        </button>
-        <div id="entity-stats" class="mt" style="display: none"></div>
-      </div>
-
-      <div class="tool-section">
-        <h3>RSS / Atom / JSON-fl&ouml;desl&auml;nkarna</h3>
-        <p class="text-sm text-muted mb">
-          Ange en slug f&ouml;r att generera klickbara feed-URL:er.
-        </p>
-        <div class="search-row">
-          <input
-            type="text"
-            id="feed-slug-input"
-            placeholder="T.ex. duni, volvo, climeon..."
-          />
-          <button class="btn" onclick="generateFeedUrls()">Generera</button>
+        <div class="ws-status">
+          <span class="ws-dot" id="ws-dot"></span>
+          <span id="ws-status-text">Fr&aring;nkopplad</span>
         </div>
-        <div id="feed-urls"></div>
       </div>
+    </header>
+    <div class="cors-banner" id="cors-banner">
+      OBS: Denna app h&auml;mtar data fr&aring;n mfn.se via CORS-proxy.
+      &Ouml;ppna via webbserver f&ouml;r b&auml;st resultat.
+    </div>
 
-      <div class="tool-section">
-        <h3>Storage URL-byggare</h3>
-        <p class="text-sm text-muted mb">
-          Ange en storage.mfn.se-URL, v&auml;lj storlek och f&ouml;rhandsvisa
-          bilden.
-        </p>
-        <div class="search-row">
-          <input
-            type="url"
-            id="storage-url-input"
-            placeholder="https://storage.mfn.se/..."
-          />
-          <select id="storage-size" style="width: auto; min-width: 130px">
-            <option value="">Original</option>
-            <option value="w-512" selected>512px</option>
-            <option value="w-1024">1024px</option>
-            <option value="w-2048">2048px</option>
-          </select>
-          <button class="btn" onclick="buildStorageUrl()">Bygg URL</button>
-        </div>
-        <div id="storage-result"></div>
-      </div>
-
-      <div class="tool-section">
-        <h3>WebSocket &mdash; Realtidsfl&ouml;de</h3>
-        <p class="text-sm text-muted mb">
-          Anslut till MFN:s nordiska WebSocket f&ouml;r live-uppdateringar.
-        </p>
-        <div class="flex-row gap-sm mb">
-          <button class="btn" id="ws-connect-btn" onclick="toggleWebSocket()">
-            Anslut
-          </button>
-          <div class="ws-status">
-            <span class="ws-dot" id="ws-dot"></span>
-            <span id="ws-status-text">Fr&aring;nkopplad</span>
+    <div class="dashboard">
+      <!-- ========== MAIN: NEWS FEED ========== -->
+      <div class="dashboard-main">
+        <div
+          class="flex-row mb"
+          style="justify-content: space-between; flex-wrap: wrap"
+        >
+          <h2 id="feed-title" style="margin-bottom: 0">Nyhetsfl&ouml;de</h2>
+          <div class="flex-row gap-sm">
+            <button
+              class="btn btn-sm"
+              onclick="loadWatchedFeed()"
+              id="btn-watched"
+              style="background: var(--green); color: #000; font-weight: 600"
+            >
+              &#9733; Bevakade
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="loadNordicFeed()">
+              Nordiskt
+            </button>
+            <button
+              class="btn btn-secondary btn-sm"
+              id="load-more-btn"
+              onclick="loadMoreNews()"
+              style="display: none"
+            >
+              Ladda fler
+            </button>
           </div>
         </div>
-        <div class="ws-log" id="ws-log" style="display: none"></div>
+        <div class="filter-bar">
+          <select
+            id="filter-lang"
+            onchange="applyFilters()"
+            style="min-width: 100px"
+          >
+            <option value="">Alla spr&aring;k</option>
+            <option value="sv">Svenska</option>
+            <option value="en">English</option>
+          </select>
+          <select
+            id="filter-type"
+            onchange="applyFilters()"
+            style="min-width: 140px"
+          >
+            <option value="">Alla typer</option>
+            <option value="ir">Regulatorisk (IR)</option>
+            <option value="pr">Pressmeddelande (PR)</option>
+          </select>
+          <input
+            type="text"
+            id="feed-search"
+            placeholder="S&ouml;k bland nyheter..."
+            oninput="applyFilters()"
+            style="
+              flex: 1;
+              min-width: 120px;
+              padding: 8px 12px;
+              font-size: 13px;
+            "
+          />
+        </div>
+        <div id="feed-count" class="feed-count"></div>
+        <div id="feed-results"></div>
       </div>
+
+      <!-- ========== SIDEBAR ========== -->
+      <div class="dashboard-sidebar">
+        <!-- S&ouml;k bolag -->
+        <div class="panel open" id="panel-search">
+          <div class="panel-header" onclick="togglePanel('panel-search')">
+            <h3>&#128269; S&ouml;k bolag p&aring; MFN</h3>
+            <span class="panel-chevron">&#9660;</span>
+          </div>
+          <div class="panel-body">
+            <div class="search-row" style="margin-bottom: 8px">
+              <input
+                type="text"
+                id="company-search"
+                placeholder="Bolagsnamn, ticker, ISIN..."
+              />
+              <button class="btn btn-sm" onclick="doCompanySearch()">
+                S&ouml;k
+              </button>
+            </div>
+            <div id="search-results"></div>
+          </div>
+        </div>
+
+        <!-- Matchade bolag -->
+        <div class="panel" id="panel-matches">
+          <div class="panel-header" onclick="togglePanel('panel-matches')">
+            <h3>
+              &#127919; Bevakade bolag
+              <span class="badge badge-blue" id="match-count">62</span>
+            </h3>
+            <span class="panel-chevron">&#9660;</span>
+          </div>
+          <div class="panel-body">
+            <div class="search-row" style="margin-bottom: 8px">
+              <input
+                type="text"
+                id="match-search"
+                placeholder="Filtrera p&aring; namn, ticker..."
+                oninput="filterMatches()"
+              />
+              <select
+                id="match-exchange"
+                onchange="filterMatches()"
+                style="width: auto; min-width: 100px"
+              >
+                <option value="">Alla b&ouml;rser</option>
+              </select>
+              <select
+                id="match-source"
+                onchange="filterMatches()"
+                style="width: auto; min-width: 100px"
+              >
+                <option value="">Alla k&auml;llor</option>
+                <option value="WatchedCompany">WatchedCompany</option>
+                <option value="FamilyOffice">FamilyOffice</option>
+              </select>
+            </div>
+            <div style="overflow-x: auto; max-height: 400px; overflow-y: auto">
+              <table class="matches-table">
+                <thead>
+                  <tr>
+                    <th>Bolag</th>
+                    <th>Ticker</th>
+                    <th>Matchtyp</th>
+                  </tr>
+                </thead>
+                <tbody id="matches-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kontaktextraktion -->
+        <div class="panel" id="panel-extract">
+          <div class="panel-header" onclick="togglePanel('panel-extract')">
+            <h3>&#128100; Kontaktextraktion</h3>
+            <span class="panel-chevron">&#9660;</span>
+          </div>
+          <div class="panel-body">
+            <div id="extract-empty">
+              <p class="text-sm text-muted">
+                Klicka p&aring; en nyhet och expandera den f&ouml;r att
+                extrahera kontakter.
+              </p>
+            </div>
+            <div id="extract-content" style="display: none"></div>
+          </div>
+        </div>
+
+        <!-- Feed-l&auml;nkar -->
+        <div class="panel" id="panel-feeds">
+          <div class="panel-header" onclick="togglePanel('panel-feeds')">
+            <h3>&#128279; RSS / JSON-fl&ouml;den</h3>
+            <span class="panel-chevron">&#9660;</span>
+          </div>
+          <div class="panel-body">
+            <div class="search-row" style="margin-bottom: 8px">
+              <input
+                type="text"
+                id="feed-slug-input"
+                placeholder="Slug (t.ex. climeon)"
+              />
+              <button class="btn btn-sm" onclick="generateFeedUrls()">
+                Generera
+              </button>
+            </div>
+            <div id="feed-urls"></div>
+          </div>
+        </div>
+
+        <!-- Entiteter -->
+        <div class="panel" id="panel-entities">
+          <div class="panel-header" onclick="togglePanel('panel-entities')">
+            <h3>&#128202; MFN-entiteter</h3>
+            <span class="panel-chevron">&#9660;</span>
+          </div>
+          <div class="panel-body">
+            <button
+              class="btn btn-sm"
+              id="entity-count-btn"
+              onclick="fetchEntityCount()"
+            >
+              H&auml;mta statistik
+            </button>
+            <div id="entity-stats" class="mt" style="display: none"></div>
+          </div>
+        </div>
+
+        <!-- Bildverktyg -->
+        <div class="panel" id="panel-storage">
+          <div class="panel-header" onclick="togglePanel('panel-storage')">
+            <h3>&#128248; Bildverktyg</h3>
+            <span class="panel-chevron">&#9660;</span>
+          </div>
+          <div class="panel-body">
+            <div class="search-row" style="margin-bottom: 8px">
+              <input
+                type="url"
+                id="storage-url-input"
+                placeholder="storage.mfn.se URL..."
+              />
+              <select id="storage-size" style="width: auto; min-width: 80px">
+                <option value="">Org</option>
+                <option value="w-512" selected>512</option>
+                <option value="w-1024">1024</option>
+              </select>
+              <button class="btn btn-sm" onclick="buildStorageUrl()">
+                Bygg
+              </button>
+            </div>
+            <div id="storage-result"></div>
+          </div>
+        </div>
+
+        <!-- WebSocket-logg -->
+        <div class="panel" id="panel-websocket">
+          <div class="panel-header" onclick="togglePanel('panel-websocket')">
+            <h3>&#9889; WebSocket-logg</h3>
+            <span class="panel-chevron">&#9660;</span>
+          </div>
+          <div class="panel-body">
+            <div class="flex-row gap-sm mb">
+              <button
+                class="btn btn-sm"
+                id="ws-connect-btn"
+                onclick="toggleWebSocket()"
+              >
+                Koppla fr&aring;n
+              </button>
+            </div>
+            <div
+              class="ws-log"
+              id="ws-log"
+              style="display: none; max-height: 250px"
+            ></div>
+          </div>
+        </div>
+      </div>
+      <!-- /sidebar -->
     </div>
+    <!-- /dashboard -->
 
     <script>
       // =============================================================================
@@ -1876,63 +1942,29 @@
       const CACHE_TTL = 5 * 60 * 1000; // 5 min
 
       // =============================================================================
-      // TAB NAVIGATION
+      // PANEL TOGGLE
       // =============================================================================
-      document.querySelectorAll(".tab-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          document
-            .querySelectorAll(".tab-btn")
-            .forEach((b) => b.classList.remove("active"));
-          document
-            .querySelectorAll(".tab-panel")
-            .forEach((p) => p.classList.remove("active"));
-          btn.classList.add("active");
-          document
-            .getElementById("tab-" + btn.dataset.tab)
-            .classList.add("active");
-        });
-      });
-
-      function switchToTab(name) {
-        document.querySelectorAll(".tab-btn").forEach((b) => {
-          b.classList.toggle("active", b.dataset.tab === name);
-        });
-        document.querySelectorAll(".tab-panel").forEach((p) => {
-          p.classList.toggle("active", p.id === "tab-" + name);
-        });
-        // Reset live counter when switching to feed
-        if (name === "feed") {
-          liveNewItems = 0;
-          updateFeedBadge();
-        }
-        // Smooth scroll to top on tab switch
-        window.scrollTo({ top: 0, behavior: "smooth" });
+      function togglePanel(id) {
+        document.getElementById(id).classList.toggle("open");
       }
+
+      // No-op switchToTab for backwards compat with selectCompany
+      function switchToTab() {}
 
       // Keyboard shortcuts
       document.addEventListener("keydown", (e) => {
-        // Escape: close expanded news
         if (e.key === "Escape" && expandedNewsId) {
           const el = document.getElementById("news-expand-" + expandedNewsId);
           if (el) el.style.display = "none";
           expandedNewsId = null;
         }
-        // Enter in company search
         if (e.key === "Enter" && e.target.id === "company-search") {
           doCompanySearch();
         }
       });
 
       function updateFeedBadge() {
-        const btn = document.getElementById("tab-btn-feed");
-        const existing = btn.querySelector(".tab-badge");
-        if (existing) existing.remove();
-        if (liveNewItems > 0) {
-          const badge = document.createElement("span");
-          badge.className = "tab-badge";
-          badge.textContent = liveNewItems;
-          btn.appendChild(badge);
-        }
+        // no-op in dashboard mode
       }
 
       // =============================================================================
@@ -2227,8 +2259,11 @@
       function selectCompany(slug, name) {
         currentFeedSlug = slug;
         document.getElementById("feed-title").textContent = `Nyheter: ${name}`;
-        switchToTab("feed");
         loadCompanyNews(slug);
+        // Scroll feed into view
+        document
+          .getElementById("feed-results")
+          .scrollIntoView({ behavior: "smooth", block: "start" });
       }
 
       // =============================================================================
@@ -2597,8 +2632,12 @@
 
       function extractFromCurrent() {
         if (!selectedNewsForExtraction) return;
-        switchToTab("extract");
+        // Open extract panel in sidebar
+        const panel = document.getElementById("panel-extract");
+        if (!panel.classList.contains("open")) panel.classList.add("open");
         runExtraction(selectedNewsForExtraction);
+        // Scroll sidebar panel into view
+        panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
       }
 
       // =============================================================================
@@ -3028,30 +3067,19 @@
         const tbody = document.getElementById("matches-tbody");
         tbody.innerHTML = filtered
           .map((m) => {
-            const tickers = (m.mfn_tickers || [])
+            const ticker = (m.mfn_tickers || [])
               .filter((t) => !t.startsWith("CAPA:") && !t.startsWith("XLON:"))
-              .map((t) => `<span class="badge badge-blue">${esc(t)}</span>`)
-              .join(" ");
-            const sources = m.sources
               .map(
-                (s) =>
-                  `<span class="badge ${
-                    s === "FamilyOffice" ? "badge-purple" : "badge-muted"
-                  }">${esc(s)}</span>`,
+                (t) =>
+                  `<span class="badge badge-blue" style="font-size:10px">${esc(t)}</span>`,
               )
               .join(" ");
             return `<tr onclick="selectCompany('${escJs(m.mfn_slug)}', '${escJs(
               m.mfn_name,
             )}')">
-      <td><strong>${esc(m.db_name)}</strong></td>
-      <td>${esc(m.mfn_name)}</td>
-      <td class="mono text-sm">${esc(m.mfn_slug)}</td>
-      <td>${tickers}</td>
-      <td class="mono text-sm">${esc(m.orgNumber)}</td>
-      <td><span class="badge ${getMatchTypeBadge(m.match_type)}">${esc(
-        m.match_type,
-      )}${m.fuzzy_score ? ` (${m.fuzzy_score})` : ""}</span></td>
-      <td>${sources}</td>
+      <td><strong>${esc(m.db_name)}</strong><br><span class="text-xs text-muted">${esc(m.mfn_slug)}</span></td>
+      <td>${ticker || '<span class="text-muted">—</span>'}</td>
+      <td><span class="badge ${getMatchTypeBadge(m.match_type)}" style="font-size:10px">${esc(m.match_type)}</span></td>
     </tr>`;
           })
           .join("");
@@ -3330,7 +3358,6 @@
       }
 
       // Auto-load watched companies feed on startup
-      switchToTab("feed");
       loadWatchedFeed();
 
       // Auto-connect WebSocket for live updates
