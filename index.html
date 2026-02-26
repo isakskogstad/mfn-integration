@@ -1834,6 +1834,51 @@
         });
       }
 
+      function formatRelativeDate(iso) {
+        if (!iso) return "";
+        const d = new Date(iso);
+        const now = new Date();
+        const diffMs = now - d;
+        const diffMin = Math.floor(diffMs / 60000);
+        const diffH = Math.floor(diffMs / 3600000);
+        const diffD = Math.floor(diffMs / 86400000);
+        if (diffMin < 1) return "Just nu";
+        if (diffMin < 60) return diffMin + " min sedan";
+        if (diffH < 24) return diffH + " tim sedan";
+        if (diffD < 7)
+          return diffD + " dag" + (diffD > 1 ? "ar" : "") + " sedan";
+        return d.toLocaleDateString("sv-SE", {
+          month: "short",
+          day: "numeric",
+          year: diffD > 365 ? "numeric" : undefined,
+        });
+      }
+
+      const TAG_LABELS = {
+        ":regulatory": "Regulatorisk",
+        ":regulatory:mar": "MAR",
+        ":regulatory:listing": "Notering",
+        "sub:report": "Rapport",
+        "sub:report:annual": "\u00c5rsredovisning",
+        "sub:report:interim": "Delrapport",
+        "sub:report:interim:q1": "Q1",
+        "sub:report:interim:q2": "Q2",
+        "sub:report:interim:q3": "Q3",
+        "sub:report:interim:q4": "Q4",
+        "sub:ca": "Bolagsh\u00e4ndelse",
+        "sub:ca:ma": "F\u00f6rv\u00e4rv",
+        "sub:ca:other": "Annan h\u00e4ndelse",
+        "sub:ci": "Bolagsinfo",
+        "sub:ci:insider": "Insynshandel",
+        "sub:ci:gm:notice": "St\u00e4mmokallelse",
+        "sub:ci:staff": "Personalf\u00f6r\u00e4ndring",
+        "sub:ci:other": "Annan info",
+        "ext:nq": "Nasdaq",
+        "ext:nq:corporate-action": "Corporate Action",
+        "ext:nq:company-announcement": "Meddelande",
+        "cus:equity-research": "Aktieanalys",
+      };
+
       function showLoading(el) {
         el.innerHTML =
           '<div class="loading-center"><div class="spinner spinner-lg"></div><span>Laddar...</span></div>';
@@ -2161,6 +2206,28 @@
         let items = allFeedItems;
         if (lang) items = items.filter((i) => i.properties?.lang === lang);
         if (type) items = items.filter((i) => i.properties?.type === type);
+
+        // Deduplicate by group_id — prefer Swedish version
+        if (!lang) {
+          const groups = new Map();
+          for (const item of items) {
+            const gid = item.group_id || item.news_id;
+            const existing = groups.get(gid);
+            if (!existing) {
+              groups.set(gid, item);
+            } else {
+              // Prefer sv over en
+              if (
+                item.properties?.lang === "sv" &&
+                existing.properties?.lang !== "sv"
+              ) {
+                groups.set(gid, item);
+              }
+            }
+          }
+          items = Array.from(groups.values());
+        }
+
         currentFeedItems = items;
         renderNewsFeed(items);
       }
@@ -2183,7 +2250,7 @@
               .map(
                 (t) =>
                   `<span class="badge ${getTagBadgeClass(t)}">${esc(
-                    t.replace(/^[:]/, ""),
+                    TAG_LABELS[t] || t.replace(/^[:]/, ""),
                   )}</span>`,
               )
               .join(" ");
@@ -2195,20 +2262,24 @@
                   author.brand_image_url,
                 )}?size=w-512" alt="" onerror="this.style.display='none'">`
               : "";
+            const title = item.content?.title || item.title || "";
+            const pubDate = item.content?.publish_date || item.published || "";
+            const preamble = item.content?.preamble || "";
             const isExpanded = expandedNewsId === item.news_id;
             return `
       <div class="card card-clickable news-item ${
         isReg ? "news-regulatory" : ""
-      }" style="margin-bottom:12px;" onclick="toggleNewsItem('${
+      }" style="margin-bottom:12px;cursor:pointer;" onclick="toggleNewsItem('${
         item.news_id
       }', ${idx})">
         <div class="news-header">
           ${logoHtml}
           <div style="flex:1;min-width:0;">
-            <div class="news-title">${esc(item.title)}</div>
+            <div class="news-title">${esc(title)}</div>
+            ${preamble ? `<div style="color:var(--text-muted);font-size:0.85rem;margin:4px 0 6px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${esc(preamble)}</div>` : ""}
             <div class="news-meta">
               <span class="news-company">${esc(author.name || "")}</span>
-              <span class="news-date">${formatDate(item.published)}</span>
+              <span class="news-date">${formatRelativeDate(pubDate)}</span>
               <span class="badge ${
                 lang === "sv" ? "badge-blue" : "badge-green"
               }">${esc(lang.toUpperCase())}</span>
