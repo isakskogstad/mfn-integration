@@ -775,6 +775,14 @@
       >
         <h2 id="feed-title" style="margin-bottom: 0">Nyhetsfl&ouml;de</h2>
         <div class="flex-row gap-sm">
+          <button
+            class="btn btn-sm"
+            onclick="loadWatchedFeed()"
+            id="btn-watched"
+            style="background: var(--green); color: #000; font-weight: 600"
+          >
+            &#9733; Bevakade bolag
+          </button>
           <button class="btn btn-secondary btn-sm" onclick="loadNordicFeed()">
             Nordiskt fl&ouml;de
           </button>
@@ -2045,7 +2053,55 @@
         }
       }
 
+      // Build a Set of watched entity_ids for fast filtering
+      const watchedEntityIds = new Set(MFN_MATCHES.map((m) => m.mfn_entity_id));
+      const watchedSlugs = new Set(MFN_MATCHES.map((m) => m.mfn_slug));
+      let watchedFeedMode = false;
+      let watchedOffset = 0;
+
+      async function loadWatchedFeed() {
+        watchedFeedMode = true;
+        currentFeedSlug = null;
+        document.getElementById("feed-title").textContent =
+          "\u2605 Bevakade bolag (" + MFN_MATCHES.length + " st)";
+        const el = document.getElementById("feed-results");
+        showLoading(el);
+        allFeedItems = [];
+        currentOffset = 0;
+        watchedOffset = 0;
+        try {
+          await fetchWatchedBatch(el, 30);
+        } catch (err) {
+          showError(el, "Kunde inte ladda bevakat fl\u00f6de: " + err.message);
+        }
+      }
+
+      async function fetchWatchedBatch(el, targetCount) {
+        let attempts = 0;
+        while (allFeedItems.length < targetCount && attempts < 8) {
+          const res = await mfnFetch(
+            `https://mfn.se/all/s/nordic.json?limit=100&offset=${watchedOffset}&compact=true`,
+          );
+          const data = await res.json();
+          const items = data.items || [];
+          if (items.length === 0) break;
+          watchedOffset += items.length;
+          const matched = items.filter(
+            (item) =>
+              watchedEntityIds.has(item.author?.entity_id) ||
+              watchedSlugs.has(item.author?.slug),
+          );
+          allFeedItems = allFeedItems.concat(matched);
+          attempts++;
+        }
+        currentFeedItems = allFeedItems;
+        currentOffset = watchedOffset;
+        document.getElementById("load-more-btn").style.display = "";
+        applyFilters();
+      }
+
       async function loadNordicFeed() {
+        watchedFeedMode = false;
         currentFeedSlug = null;
         document.getElementById("feed-title").textContent =
           "Nordiskt nyhetsfl\u00f6de";
@@ -2069,6 +2125,18 @@
       }
 
       async function loadMoreNews() {
+        if (watchedFeedMode) {
+          const el = document.getElementById("feed-results");
+          const prevCount = allFeedItems.length;
+          try {
+            await fetchWatchedBatch(el, allFeedItems.length + 20);
+            if (allFeedItems.length === prevCount)
+              document.getElementById("load-more-btn").style.display = "none";
+          } catch (err) {
+            console.error("Load more error:", err);
+          }
+          return;
+        }
         const slug = currentFeedSlug;
         const url = slug
           ? `https://mfn.se/all/a/${slug}.json?limit=20&offset=${currentOffset}`
@@ -2943,6 +3011,10 @@
       if (window.location.protocol === "file:") {
         document.getElementById("cors-banner").style.display = "block";
       }
+
+      // Auto-load watched companies feed on startup
+      switchToTab("feed");
+      loadWatchedFeed();
     </script>
   </body>
 </html>
