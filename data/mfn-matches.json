@@ -1,0 +1,1242 @@
+[
+ {
+  "db_name": "Agtira AB",
+  "orgNumber": "559033-7654",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Agtira",
+  "mfn_entity_id": "6772b210-accd-45b6-83a3-b5880548554c",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "agtira",
+  "mfn_tickers": [
+   "FNSE:AGTIRA B"
+  ],
+  "mfn_isins": [
+   "SE0008588354"
+  ]
+ },
+ {
+  "db_name": "Arjo AB (publ)",
+  "orgNumber": "559092-8064",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Arjo",
+  "mfn_entity_id": "b1688b29-8069-42cd-a151-26f3c25fb314",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "arjo",
+  "mfn_tickers": [
+   "XSTO:ARJO B",
+   "XLON:0HQ8"
+  ],
+  "mfn_isins": [
+   "SE0010468116"
+  ]
+ },
+ {
+  "db_name": "Avsalt AB",
+  "orgNumber": "559199-3661",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Avsalt Group",
+  "mfn_entity_id": "f5dee7bb-b8b5-41dd-a9fb-73fafd4fbd3a",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "avsalt-group",
+  "mfn_tickers": [
+   "NSME:AVSALT"
+  ],
+  "mfn_isins": [
+   "SE0022242681"
+  ]
+ },
+ {
+  "db_name": "Bioextrax AB (publ)",
+  "orgNumber": "556965-1473",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Bioextrax",
+  "mfn_entity_id": "6c5dcc45-aa20-4e1a-9a7c-fcd7579ecf03",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "bioextrax",
+  "mfn_tickers": [
+   "FNSE:BIOEX",
+   "CAPA:BIOEXs"
+  ],
+  "mfn_isins": [
+   "SE0016276752"
+  ]
+ },
+ {
+  "db_name": "Biofrigas Sweden AB (publ)",
+  "orgNumber": "556902-2881",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Biofrigas",
+  "mfn_entity_id": "15abfbb4-3d68-4fe1-9660-cb7d5eb534de",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "biofrigas",
+  "mfn_tickers": [
+   "XSAT:BIOF"
+  ],
+  "mfn_isins": [
+   "SE0014262887"
+  ]
+ },
+ {
+  "db_name": "BoMill AB",
+  "orgNumber": "556556-4332",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "BoMill",
+  "mfn_entity_id": "03059498-fd6e-44c9-8819-7159558f9686",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "bomill",
+  "mfn_tickers": [
+   "FNSE:BOMILL",
+   "CAPA:BOMILs"
+  ],
+  "mfn_isins": [
+   "SE0014583332"
+  ]
+ },
+ {
+  "db_name": "Bure Equity",
+  "orgNumber": "556454-8781",
+  "sources": [
+   "WatchedCompany",
+   "FamilyOffice"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Bure Equity AB",
+  "mfn_entity_id": "448ddd85-ea99-42a7-9f3d-6b124dad8218",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "bure-equity",
+  "mfn_tickers": [
+   "XSTO:BURE",
+   "CAPA:BUREs",
+   "XLON:0N7D"
+  ],
+  "mfn_isins": [
+   "SE0000195810"
+  ]
+ },
+ {
+  "db_name": "Byggmästare AJ Ahlström",
+  "orgNumber": "556943-7774",
+  "sources": [
+   "WatchedCompany",
+   "FamilyOffice"
+  ],
+  "match_type": "fuzzy",
+  "mfn_name": "Byggmästare Anders J Ahlström Holding",
+  "mfn_entity_id": "e2dfa7e6-0903-440c-b01a-c5a0ebf5cbc2",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "fuzzy_score": 0.885,
+  "mfn_slug": "byggmastare-anders-j-ahlstrom-holding",
+  "mfn_tickers": [
+   "XSTO:AJA B",
+   "CAPA:AJABs"
+  ],
+  "mfn_isins": [
+   "SE0026876476"
+  ]
+ },
+ {
+  "db_name": "Byhmgard AB",
+  "orgNumber": "559335-3773",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Byhmgard",
+  "mfn_entity_id": "ee4bae61-2150-40ec-9d1a-575f6bffdd17",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "byhmgard",
+  "mfn_tickers": [
+   "NSME:BESS"
+  ],
+  "mfn_isins": [
+   "SE0023849583"
+  ]
+ },
+ {
+  "db_name": "C100 AB (publ)",
+  "orgNumber": "559074-4313",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "C100",
+  "mfn_entity_id": "1591f5be-ee47-465e-8837-9e0b147b5c5a",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "c100",
+  "mfn_tickers": [
+   "XSAT:C100"
+  ],
+  "mfn_isins": [
+   "SE0017616006"
+  ]
+ },
+ {
+  "db_name": "Cinis Fertilizer AB",
+  "orgNumber": "559154-0322",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Cinis Fertilizer",
+  "mfn_entity_id": "f742d533-f091-4e65-a37f-a7df33b25ad8",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "cinis-fertilizer",
+  "mfn_tickers": [
+   "FNSE:CINIS",
+   "CAPA:CINISs"
+  ],
+  "mfn_isins": [
+   "SE0018040784"
+  ]
+ },
+ {
+  "db_name": "CirChem AB",
+  "orgNumber": "556951-7427",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "CirChem",
+  "mfn_entity_id": "e58aeb30-e62f-437f-a617-d48be513c389",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "circhem",
+  "mfn_tickers": [
+   "FNSE:CIRCHE",
+   "CAPA:CIRCHs"
+  ],
+  "mfn_isins": [
+   "SE0015193529"
+  ]
+ },
+ {
+  "db_name": "Clean Motion AB",
+  "orgNumber": "556788-1825",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Clean Motion",
+  "mfn_entity_id": "ccccca99-07c3-49a8-bc7e-3a79381052f0",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "clean-motion",
+  "mfn_tickers": [
+   "FNSE:CLEMO",
+   "CAPA:CLEMOs"
+  ],
+  "mfn_isins": [
+   "SE0008216303"
+  ]
+ },
+ {
+  "db_name": "Climeon AB (publ)",
+  "orgNumber": "556846-1643",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Climeon",
+  "mfn_entity_id": "e0b40489-12e2-4051-83d9-92e177479aa8",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "climeon",
+  "mfn_tickers": [
+   "FNSE:CLIME B",
+   "XLON:0GHX"
+  ],
+  "mfn_isins": [
+   "SE0023837182"
+  ]
+ },
+ {
+  "db_name": "Creades",
+  "orgNumber": "556866-0723",
+  "sources": [
+   "WatchedCompany",
+   "FamilyOffice"
+  ],
+  "match_type": "exact",
+  "mfn_name": "Creades",
+  "mfn_entity_id": "fb2167f5-154e-4c8f-8faf-f97e05f7e260",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "creades",
+  "mfn_tickers": [
+   "XSTO:CRED A",
+   "CAPA:CREDAs",
+   "XLON:0QI9"
+  ],
+  "mfn_isins": [
+   "SE0015661236"
+  ]
+ },
+ {
+  "db_name": "Creturner Group AB (publ)",
+  "orgNumber": "559152-3013",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Creturner",
+  "mfn_entity_id": "da54afa6-3e68-435a-a5ae-49b4146e7c9a",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "creturner",
+  "mfn_tickers": [
+   "NSME:CRET"
+  ],
+  "mfn_isins": [
+   "SE0013460375"
+  ]
+ },
+ {
+  "db_name": "CTEK AB (publ)",
+  "orgNumber": "559217-4659",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "CTEK",
+  "mfn_entity_id": "e62f1df4-2a77-44a2-a737-2e37b7f54580",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "ctek",
+  "mfn_tickers": [
+   "XSTO:CTEK",
+   "CAPA:CTEKs"
+  ],
+  "mfn_isins": [
+   "SE0016798763"
+  ]
+ },
+ {
+  "db_name": "CTEK Sweden AB",
+  "orgNumber": "556540-3234",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "CTEK",
+  "mfn_entity_id": "e62f1df4-2a77-44a2-a737-2e37b7f54580",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "ctek",
+  "mfn_tickers": [
+   "XSTO:CTEK",
+   "CAPA:CTEKs"
+  ],
+  "mfn_isins": [
+   "SE0016798763"
+  ]
+ },
+ {
+  "db_name": "DUG Foodtech AB (publ)",
+  "orgNumber": "559054-4655",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "DUG Foodtech",
+  "mfn_entity_id": "9c345ccd-ead8-470f-b4b4-79c86e9a3d34",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "dug-foodtech",
+  "mfn_tickers": [
+   "FNSE:DUG"
+  ],
+  "mfn_isins": [
+   "SE0013281979"
+  ]
+ },
+ {
+  "db_name": "Duni AB",
+  "orgNumber": "556536-7488",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Duni",
+  "mfn_entity_id": "81ca67a1-632b-450f-9db7-946963f337d1",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "duni",
+  "mfn_tickers": [
+   "XSTO:DUNI",
+   "CAPA:DUNIs",
+   "XLON:0HR3"
+  ],
+  "mfn_isins": [
+   "SE0000616716"
+  ]
+ },
+ {
+  "db_name": "Ecoclime Group AB",
+  "orgNumber": "556902-1800",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Ecoclime Group",
+  "mfn_entity_id": "84e87bbd-13a1-49c8-85fb-60305f6f7fb8",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "ecoclime-group",
+  "mfn_tickers": [
+   "NSME:ECC B"
+  ],
+  "mfn_isins": [
+   "SE0012729937"
+  ]
+ },
+ {
+  "db_name": "EcoRub AB",
+  "orgNumber": "556438-0284",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "EcoRub",
+  "mfn_entity_id": "f95f3646-db5e-487c-9f2c-28f8ec9ee3bd",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "ecorub",
+  "mfn_tickers": [
+   "XSAT:ECO B"
+  ],
+  "mfn_isins": [
+   "SE0003273531"
+  ]
+ },
+ {
+  "db_name": "Ferroamp AB (publ)",
+  "orgNumber": "556805-7029",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Ferroamp",
+  "mfn_entity_id": "181e39e6-9efd-4a51-ace1-6f8a53ab8084",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "ferroamp",
+  "mfn_tickers": [
+   "FNSE:FERRO",
+   "CAPA:FERROs"
+  ],
+  "mfn_isins": [
+   "SE0012229920"
+  ]
+ },
+ {
+  "db_name": "Flat Capital",
+  "orgNumber": "556941-0110",
+  "sources": [
+   "WatchedCompany",
+   "FamilyOffice"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Flat Capital AB (publ)",
+  "mfn_entity_id": "d2547a69-6c9f-4362-84c5-5f865f10f5e8",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "flatcapital",
+  "mfn_tickers": [
+   "FNSE:FLAT B",
+   "CAPA:FLATBs"
+  ],
+  "mfn_isins": [
+   "SE0016609846"
+  ]
+ },
+ {
+  "db_name": "Gomero Group AB",
+  "orgNumber": "556623-4976",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Gomero Group",
+  "mfn_entity_id": "f04b73a1-751d-4053-abd7-23c00568e60d",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "gomero-group",
+  "mfn_tickers": [
+   "XSAT:GOMERO"
+  ],
+  "mfn_isins": [
+   "SE0011167535"
+  ]
+ },
+ {
+  "db_name": "Greater Than AB",
+  "orgNumber": "556965-2885",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Greater Than",
+  "mfn_entity_id": "8a32dd94-37d7-4ddd-b0c8-0ab52b893dfb",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "greater-than",
+  "mfn_tickers": [
+   "FNSE:GREAT",
+   "CAPA:GREATs"
+  ],
+  "mfn_isins": [
+   "SE0005881554"
+  ]
+ },
+ {
+  "db_name": "HEXICON AB",
+  "orgNumber": "556795-9894",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "exact",
+  "mfn_name": "Hexicon AB",
+  "mfn_entity_id": "7457764f-216d-47f5-b393-b1445169e0de",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "hexicon",
+  "mfn_tickers": [
+   "FNSE:HEXI",
+   "CAPA:HEXIs"
+  ],
+  "mfn_isins": [
+   "SE0004898799"
+  ]
+ },
+ {
+  "db_name": "Humble Group AB",
+  "orgNumber": "556794-4797",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Humble Group",
+  "mfn_entity_id": "030869fd-b776-4c2d-864f-ef7749563b24",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "humble-group",
+  "mfn_tickers": [
+   "XSTO:HUMBLE",
+   "CAPA:HUMBLs"
+  ],
+  "mfn_isins": [
+   "SE0006261046"
+  ]
+ },
+ {
+  "db_name": "Hybricon AB",
+  "orgNumber": "556936-2196",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Hybricon",
+  "mfn_entity_id": "67ff99dc-15b2-450b-8fb5-e7e9028a8b29",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "hybricon",
+  "mfn_tickers": [
+   "NSME:HYCO"
+  ],
+  "mfn_isins": [
+   "SE0015345897"
+  ]
+ },
+ {
+  "db_name": "I-Tech AB",
+  "orgNumber": "556585-9682",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "I-tech",
+  "mfn_entity_id": "eb7cf689-1860-4422-ab01-ed858f5a3051",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "i-tech",
+  "mfn_tickers": [
+   "FNSE:ITECH",
+   "CAPA:ITECHs"
+  ],
+  "mfn_isins": [
+   "SE0011167725"
+  ]
+ },
+ {
+  "db_name": "Insplorion AB",
+  "orgNumber": "556798-8760",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Insplorion",
+  "mfn_entity_id": "4dd45bfb-1fed-4439-95ff-80d6ce84fa1f",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "insplorion",
+  "mfn_tickers": [
+   "FNSE:INSP",
+   "CAPA:INSPs"
+  ],
+  "mfn_isins": [
+   "SE0006994943"
+  ]
+ },
+ {
+  "db_name": "Latour",
+  "orgNumber": "556026-3237",
+  "sources": [
+   "WatchedCompany",
+   "FamilyOffice"
+  ],
+  "match_type": "exact",
+  "mfn_name": "Latour",
+  "mfn_entity_id": "7cbfe9cb-a109-486e-a3f1-c33ce8cdb5ed",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "latour",
+  "mfn_tickers": [
+   "XSTO:LATO B",
+   "CAPA:LATOBs",
+   "XLON:0RQP"
+  ],
+  "mfn_isins": [
+   "SE0010100958"
+  ]
+ },
+ {
+  "db_name": "Linc",
+  "orgNumber": "559210-8947",
+  "sources": [
+   "WatchedCompany",
+   "FamilyOffice"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Linc AB",
+  "mfn_entity_id": "6fb3250d-226b-46fa-8ac8-6d756ffe293c",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "linc-ab",
+  "mfn_tickers": [
+   "XSTO:LINC",
+   "CAPA:LINCs"
+  ],
+  "mfn_isins": [
+   "SE0015949433"
+  ]
+ },
+ {
+  "db_name": "LN Future Invest AB",
+  "orgNumber": "556419-2663",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "LN Future Invest",
+  "mfn_entity_id": "82630657-54ca-45e4-b226-ff7a10fe63b9",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "ln-future-invest",
+  "mfn_tickers": [
+   "FNSE:LNFI",
+   "CAPA:LNFIs"
+  ],
+  "mfn_isins": [
+   "SE0014730347"
+  ]
+ },
+ {
+  "db_name": "Lyckegård Group AB",
+  "orgNumber": "556757-7597",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Lyckegård Group",
+  "mfn_entity_id": "8daf41d8-6193-444c-a885-876b7e365c07",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "lyckegard",
+  "mfn_tickers": [
+   "FNSE:LYGRD"
+  ],
+  "mfn_isins": [
+   "SE0017160575"
+  ]
+ },
+ {
+  "db_name": "Lyko Group",
+  "orgNumber": "556975-8229",
+  "sources": [
+   "WatchedCompany",
+   "FamilyOffice"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Lyko Group AB",
+  "mfn_entity_id": "d9e11522-2f7d-4fd1-8f4b-9eac25d021ce",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "lyko-group",
+  "mfn_tickers": [
+   "FNSE:LYKO A",
+   "CAPA:LYKOAs"
+  ],
+  "mfn_isins": [
+   "SE0010468918"
+  ]
+ },
+ {
+  "db_name": "Mantex Aktiebolag",
+  "orgNumber": "556550-8537",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Mantex",
+  "mfn_entity_id": "94e8c5f0-4ec9-4639-beaa-dab4616cd47d",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "mantex",
+  "mfn_tickers": [
+   "FNSE:MANTEX",
+   "CAPA:MANTEs"
+  ],
+  "mfn_isins": [
+   "SE0023467451"
+  ]
+ },
+ {
+  "db_name": "Metacon AB (publ)",
+  "orgNumber": "556724-1616",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Metacon",
+  "mfn_entity_id": "b2233b77-be55-4257-8aea-ebab70d8a63a",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "metacon",
+  "mfn_tickers": [
+   "FNSE:META",
+   "CAPA:METAs"
+  ],
+  "mfn_isins": [
+   "SE0003086214"
+  ]
+ },
+ {
+  "db_name": "Midsummer AB",
+  "orgNumber": "556665-7838",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Midsummer",
+  "mfn_entity_id": "df4fc81a-de11-49a3-b0b0-cedeca36ec82",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "midsummer",
+  "mfn_tickers": [
+   "FNSE:MIDS",
+   "CAPA:MIDSs"
+  ],
+  "mfn_isins": [
+   "SE0011281757"
+  ]
+ },
+ {
+  "db_name": "Minesto AB",
+  "orgNumber": "556719-4914",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Minesto",
+  "mfn_entity_id": "bef24d45-e9b1-4798-b8f1-76c4c4cccde8",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "minesto",
+  "mfn_tickers": [
+   "FNSE:MINEST",
+   "CAPA:MINESs"
+  ],
+  "mfn_isins": [
+   "SE0007578141"
+  ]
+ },
+ {
+  "db_name": "Modelon AB (publ)",
+  "orgNumber": "556672-3010",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Modelon AB",
+  "mfn_entity_id": "07c7a020-b9be-4e5a-96cb-398cb39918ce",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "modelon",
+  "mfn_tickers": [
+   "FNSE:MODEL",
+   "CAPA:MODELs"
+  ],
+  "mfn_isins": [
+   "SE0023112438"
+  ]
+ },
+ {
+  "db_name": "Monivent AB",
+  "orgNumber": "556956-5707",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Monivent",
+  "mfn_entity_id": "2143d2da-a46f-49ba-a3e9-43d1863c6435",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "monivent",
+  "mfn_tickers": [
+   "XSAT:MONI"
+  ],
+  "mfn_isins": [
+   "SE0013512282"
+  ]
+ },
+ {
+  "db_name": "Nattaro Labs AB",
+  "orgNumber": "556846-8465",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Nattaro Labs",
+  "mfn_entity_id": "0f238a1e-5696-483c-98b7-d8ffbfd8ae66",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "nattaro-labs",
+  "mfn_tickers": [
+   "XSAT:NATTA"
+  ],
+  "mfn_isins": [
+   "SE0016844534"
+  ]
+ },
+ {
+  "db_name": "Nexam Chemical AB",
+  "orgNumber": "556784-6711",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Nexam Chemical Holding",
+  "mfn_entity_id": "dab4bce0-29cd-462c-9772-afdb47b39268",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "nexam-chemical-holding",
+  "mfn_tickers": [
+   "FNSE:NEXAM",
+   "CAPA:NEXAMs"
+  ],
+  "mfn_isins": [
+   "SE0005101003"
+  ]
+ },
+ {
+  "db_name": "Öresund",
+  "orgNumber": "556539-8582",
+  "sources": [
+   "WatchedCompany",
+   "FamilyOffice"
+  ],
+  "match_type": "exact",
+  "mfn_name": "Öresund",
+  "mfn_entity_id": "11a3dda7-3314-4d20-8f12-3d421dc35519",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "oresund",
+  "mfn_tickers": [
+   "XSTO:ORES",
+   "CAPA:ORESs",
+   "XLON:0RGB"
+  ],
+  "mfn_isins": [
+   "SE0008321608"
+  ]
+ },
+ {
+  "db_name": "OrganoClick AB",
+  "orgNumber": "556704-6908",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "OrganoClick",
+  "mfn_entity_id": "912d1f41-c37e-4c46-b044-e0a07c59d4a4",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "organoclick",
+  "mfn_tickers": [
+   "FNSE:ORGC",
+   "CAPA:ORGCs"
+  ],
+  "mfn_isins": [
+   "SE0006510335"
+  ]
+ },
+ {
+  "db_name": "Powercell Sweden AB (publ)",
+  "orgNumber": "556759-8353",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "exact",
+  "mfn_name": "PowerCell Sweden AB (publ)",
+  "mfn_entity_id": "05cf9591-3152-4479-bf8d-e60a78178e2e",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "powercell-sweden",
+  "mfn_tickers": [
+   "XSTO:PCELL",
+   "CAPA:PCELLs",
+   "XLON:0G9R"
+  ],
+  "mfn_isins": [
+   "SE0006425815"
+  ]
+ },
+ {
+  "db_name": "Prebona AB",
+  "orgNumber": "556855-5022",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Prebona",
+  "mfn_entity_id": "eeb34480-ef27-49dc-abc1-df29cf8c2f67",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "prebona",
+  "mfn_tickers": [
+   "XSAT:PREBON"
+  ],
+  "mfn_isins": [
+   "SE0007692884"
+  ]
+ },
+ {
+  "db_name": "Recyctec AB",
+  "orgNumber": "556750-7628",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Recyctec Holding",
+  "mfn_entity_id": "20633de6-7753-430e-9b03-1c1b2eaeb2b2",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "recyctec-holding",
+  "mfn_tickers": [
+   "XSAT:RECY B"
+  ],
+  "mfn_isins": [
+   "SE0014808978"
+  ]
+ },
+ {
+  "db_name": "SaltX Technology Holding AB (publ)",
+  "orgNumber": "556917-6596",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "SaltX Technology Holding",
+  "mfn_entity_id": "f2771f71-b2c1-41bd-9c53-7705d0cf3d20",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "saltx-technology-holding",
+  "mfn_tickers": [
+   "FNSE:SALT B",
+   "CAPA:SALTBs",
+   "XLON:0G6W"
+  ],
+  "mfn_isins": [
+   "SE0005308541"
+  ]
+ },
+ {
+  "db_name": "Scandinavian Enviro Systems AB",
+  "orgNumber": "556605-6726",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Scandinavian Enviro Systems AB (publ)",
+  "mfn_entity_id": "43f3e6a4-3cf4-4770-83dc-816845770e1f",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "scandinavian-enviro-systems",
+  "mfn_tickers": [
+   "FNSE:SES",
+   "CAPA:SESs"
+  ],
+  "mfn_isins": [
+   "SE0005877560"
+  ]
+ },
+ {
+  "db_name": "SeaTwirl AB (publ)",
+  "orgNumber": "556890-1135",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "SeaTwirl",
+  "mfn_entity_id": "96f5751a-ae16-441d-a892-2f7f526934a6",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "seatwirl",
+  "mfn_tickers": [
+   "FNSE:STW",
+   "CAPA:STWs"
+  ],
+  "mfn_isins": [
+   "SE0009242175"
+  ]
+ },
+ {
+  "db_name": "SHT Smart High-Tech Aktiebolag",
+  "orgNumber": "556077-7434",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "SHT Smart High-Tech",
+  "mfn_entity_id": "1f35ee24-967c-4138-9ee6-6df83b33df79",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "sht-smart-high-tech",
+  "mfn_tickers": [
+   "XSAT:SHT B"
+  ],
+  "mfn_isins": [
+   "SE0016843809"
+  ]
+ },
+ {
+  "db_name": "Smoltek Nanotech Holding AB",
+  "orgNumber": "559020-2262",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Smoltek Nanotech Holding",
+  "mfn_entity_id": "bb4ad7ad-d359-4389-b113-99f64ff84603",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "smoltek-nanotech-holding",
+  "mfn_tickers": [
+   "XSAT:SMOL",
+   "CAPA:SMOLs"
+  ],
+  "mfn_isins": [
+   "SE0010820381"
+  ]
+ },
+ {
+  "db_name": "Sustainable Energy Solutions Sweden Holding AB",
+  "orgNumber": "556530-5868",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Sustainable Energy Solutions Sweden Holding",
+  "mfn_entity_id": "8f2c9e97-1050-4382-9387-b0f511ae5dd6",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "sustainable-energy-solutions-sweden-holding",
+  "mfn_tickers": [
+   "NSME:SENS"
+  ],
+  "mfn_isins": [
+   "SE0011643980"
+  ]
+ },
+ {
+  "db_name": "Svenska Aerogel AB",
+  "orgNumber": "556581-3028",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Svenska Aerogel Holding",
+  "mfn_entity_id": "dc018f91-f062-4fb3-b093-4798a7b3c568",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "svenska-aerogel-holding",
+  "mfn_tickers": [
+   "FNSE:AERO",
+   "CAPA:AEROs"
+  ],
+  "mfn_isins": [
+   "SE0023440557"
+  ]
+ },
+ {
+  "db_name": "Svolder",
+  "orgNumber": "556469-2019",
+  "sources": [
+   "WatchedCompany",
+   "FamilyOffice"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Svolder AB (publ)",
+  "mfn_entity_id": "0591da51-7678-40da-a783-47ddb63a6698",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "svolder",
+  "mfn_tickers": [
+   "XSTO:SVOL B",
+   "CAPA:SVOLBs",
+   "XSTO:SVOL A",
+   "CAPA:SVOLAs"
+  ],
+  "mfn_isins": [
+   "SE0017161441",
+   "SE0017161458"
+  ]
+ },
+ {
+  "db_name": "Traction",
+  "orgNumber": "556105-1243",
+  "sources": [
+   "WatchedCompany",
+   "FamilyOffice"
+  ],
+  "match_type": "exact",
+  "mfn_name": "Traction",
+  "mfn_entity_id": "551fe57a-5d99-4cb2-98eb-d97a4c860afe",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "traction",
+  "mfn_tickers": [
+   "XSTO:TRAC B",
+   "CAPA:TRACBs",
+   "XLON:0GOS"
+  ],
+  "mfn_isins": [
+   "SE0000391716"
+  ]
+ },
+ {
+  "db_name": "Unibap Space Solutions AB (publ)",
+  "orgNumber": "556925-1134",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Unibap Space Solutions",
+  "mfn_entity_id": "8a253944-3750-45ab-a596-0cddc602c70c",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "unibap-space-solutions",
+  "mfn_tickers": [
+   "FNSE:UNIBAP",
+   "CAPA:UNIBAs"
+  ],
+  "mfn_isins": [
+   "SE0009606809"
+  ]
+ },
+ {
+  "db_name": "Vend Marketplaces AB",
+  "orgNumber": "556610-3429",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Vend Marketplaces",
+  "mfn_entity_id": "70ba2154-90b6-447b-bd70-e7464c6c82d3",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "vend-marketplaces",
+  "mfn_tickers": [
+   "XOSL:VEND",
+   "XLON:0R9I"
+  ],
+  "mfn_isins": [
+   "NO0010736879"
+  ]
+ },
+ {
+  "db_name": "Voi Technology AB",
+  "orgNumber": "559160-2999",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "exact",
+  "mfn_name": "Voi Technology AB",
+  "mfn_entity_id": "84595893-0285-46d9-af1f-9ba2199a718a",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "voitechnology",
+  "mfn_tickers": [],
+  "mfn_isins": [
+   "SE0023134952"
+  ]
+ },
+ {
+  "db_name": "Xoma AB",
+  "orgNumber": "559071-5750",
+  "sources": [
+   "WatchedCompany"
+  ],
+  "match_type": "normalized",
+  "mfn_name": "Xoma",
+  "mfn_entity_id": "2ab3447a-2103-4385-bfd8-35acacd93748",
+  "mfn_ticker": null,
+  "mfn_exchange": null,
+  "mfn_slug": "xoma",
+  "mfn_tickers": [
+   "XSAT:XOMA B"
+  ],
+  "mfn_isins": [
+   "SE0019174194"
+  ]
+ }
+]
