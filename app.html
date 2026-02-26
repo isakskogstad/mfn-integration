@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MFN Explorer — Nordiska pressmeddelanden</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='20' width='100' height='100' fill='%234a6cf7'/><text x='50' y='68' font-size='50' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='bold'>M</text></svg>"
+    />
     <style>
       *,
       *::before,
@@ -728,6 +732,82 @@
           opacity: 0.4;
         }
       }
+
+      /* ---- FEED SEARCH ---- */
+      .feed-search-row {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      .feed-search-row input {
+        flex: 1;
+        padding: 8px 12px;
+        font-size: 13px;
+      }
+      .feed-count {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-bottom: 8px;
+      }
+
+      /* ---- LIVE INDICATOR ---- */
+      .live-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--green);
+        background: var(--green-bg);
+        padding: 3px 8px;
+        border-radius: 10px;
+        margin-left: 8px;
+      }
+      .live-badge .live-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--green);
+        animation: pulse 2s infinite;
+      }
+
+      /* ---- TAB BADGE ---- */
+      .tab-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 18px;
+        height: 18px;
+        background: var(--green);
+        color: #000;
+        font-size: 10px;
+        font-weight: 700;
+        border-radius: 9px;
+        padding: 0 5px;
+        margin-left: 4px;
+      }
+
+      /* ---- NEW ITEM FLASH ---- */
+      @keyframes newsFlash {
+        0% {
+          background: rgba(52, 211, 153, 0.15);
+        }
+        100% {
+          background: var(--bg-card);
+        }
+      }
+      .news-item-new {
+        animation: newsFlash 2s ease-out;
+      }
+
+      /* ---- LOAD MORE ---- */
+      .load-more-bar {
+        text-align: center;
+        padding: 16px;
+      }
+      .load-more-bar .btn {
+        min-width: 200px;
+      }
     </style>
   </head>
   <body>
@@ -738,7 +818,9 @@
       </div>
       <nav class="tab-bar">
         <button class="tab-btn active" data-tab="search">S&ouml;k bolag</button>
-        <button class="tab-btn" data-tab="feed">Nyhetsfl&ouml;de</button>
+        <button class="tab-btn" data-tab="feed" id="tab-btn-feed">
+          Nyhetsfl&ouml;de
+        </button>
         <button class="tab-btn" data-tab="extract">Kontaktextraktion</button>
         <button class="tab-btn" data-tab="matches">Matchade bolag</button>
         <button class="tab-btn" data-tab="tools">Kalender &amp; Verktyg</button>
@@ -809,7 +891,21 @@
           <option value="ir">Regulatorisk (IR)</option>
           <option value="pr">Pressmeddelande (PR)</option>
         </select>
+        <span id="live-indicator" style="display: none"
+          ><span class="live-badge"
+            ><span class="live-dot"></span>LIVE</span
+          ></span
+        >
       </div>
+      <div class="feed-search-row">
+        <input
+          type="text"
+          id="feed-search"
+          placeholder="S&ouml;k bland laddade nyheter..."
+          oninput="applyFilters()"
+        />
+      </div>
+      <div id="feed-count" class="feed-count"></div>
       <div id="feed-results"></div>
     </div>
 
@@ -1775,6 +1871,9 @@
       let expandedNewsId = null;
       let selectedNewsForExtraction = null;
       let wsConnection = null;
+      let liveNewItems = 0; // count of new items from WebSocket since last view
+      const CACHE_KEY = "mfn-explorer-feed-cache";
+      const CACHE_TTL = 5 * 60 * 1000; // 5 min
 
       // =============================================================================
       // TAB NAVIGATION
@@ -1801,6 +1900,63 @@
         document.querySelectorAll(".tab-panel").forEach((p) => {
           p.classList.toggle("active", p.id === "tab-" + name);
         });
+        // Reset live counter when switching to feed
+        if (name === "feed") {
+          liveNewItems = 0;
+          updateFeedBadge();
+        }
+        // Smooth scroll to top on tab switch
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      // Keyboard shortcuts
+      document.addEventListener("keydown", (e) => {
+        // Escape: close expanded news
+        if (e.key === "Escape" && expandedNewsId) {
+          const el = document.getElementById("news-expand-" + expandedNewsId);
+          if (el) el.style.display = "none";
+          expandedNewsId = null;
+        }
+        // Enter in company search
+        if (e.key === "Enter" && e.target.id === "company-search") {
+          doCompanySearch();
+        }
+      });
+
+      function updateFeedBadge() {
+        const btn = document.getElementById("tab-btn-feed");
+        const existing = btn.querySelector(".tab-badge");
+        if (existing) existing.remove();
+        if (liveNewItems > 0) {
+          const badge = document.createElement("span");
+          badge.className = "tab-badge";
+          badge.textContent = liveNewItems;
+          btn.appendChild(badge);
+        }
+      }
+
+      // =============================================================================
+      // CACHE HELPERS
+      // =============================================================================
+      function saveFeedCache(items) {
+        try {
+          const data = { items: items.slice(0, 50), ts: Date.now() };
+          localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+        } catch (e) {
+          /* quota exceeded, ignore */
+        }
+      }
+
+      function loadFeedCache() {
+        try {
+          const raw = localStorage.getItem(CACHE_KEY);
+          if (!raw) return null;
+          const data = JSON.parse(raw);
+          if (Date.now() - data.ts > CACHE_TTL) return null;
+          return data.items;
+        } catch (e) {
+          return null;
+        }
       }
 
       // =============================================================================
@@ -2110,14 +2266,28 @@
         document.getElementById("feed-title").textContent =
           "\u2605 Bevakade bolag (" + MFN_MATCHES.length + " st)";
         const el = document.getElementById("feed-results");
-        showLoading(el);
+
+        // Show cached data instantly while fetching fresh
+        const cached = loadFeedCache();
+        if (cached && cached.length > 0) {
+          allFeedItems = cached;
+          applyFilters();
+        } else {
+          showLoading(el);
+        }
+
         allFeedItems = [];
         currentOffset = 0;
         watchedOffset = 0;
         try {
           await fetchWatchedBatch(el, 30);
         } catch (err) {
-          showError(el, "Kunde inte ladda bevakat fl\u00f6de: " + err.message);
+          if (!cached || cached.length === 0) {
+            showError(
+              el,
+              "Kunde inte ladda bevakat fl\u00f6de: " + err.message,
+            );
+          }
         }
       }
 
@@ -2203,9 +2373,26 @@
       function applyFilters() {
         const lang = document.getElementById("filter-lang").value;
         const type = document.getElementById("filter-type").value;
+        const search = (document.getElementById("feed-search").value || "")
+          .toLowerCase()
+          .trim();
         let items = allFeedItems;
         if (lang) items = items.filter((i) => i.properties?.lang === lang);
         if (type) items = items.filter((i) => i.properties?.type === type);
+
+        // Free-text search across title, preamble, company name
+        if (search) {
+          items = items.filter((i) => {
+            const title = (i.content?.title || i.title || "").toLowerCase();
+            const preamble = (i.content?.preamble || "").toLowerCase();
+            const company = (i.author?.name || "").toLowerCase();
+            return (
+              title.includes(search) ||
+              preamble.includes(search) ||
+              company.includes(search)
+            );
+          });
+        }
 
         // Deduplicate sv/en pairs — prefer Swedish version
         // group_id is NOT shared between language versions, so we key on
@@ -2220,7 +2407,6 @@
             if (!existing) {
               groups.set(key, item);
             } else {
-              // Prefer sv over en
               if (
                 item.properties?.lang === "sv" &&
                 existing.properties?.lang !== "sv"
@@ -2232,8 +2418,19 @@
           items = Array.from(groups.values());
         }
 
+        // Update count display
+        const countEl = document.getElementById("feed-count");
+        if (search || lang || type) {
+          countEl.textContent = `Visar ${items.length} av ${allFeedItems.length} nyheter`;
+        } else {
+          countEl.textContent = items.length ? `${items.length} nyheter` : "";
+        }
+
         currentFeedItems = items;
         renderNewsFeed(items);
+
+        // Cache the feed
+        saveFeedCache(allFeedItems);
       }
 
       function renderNewsFeed(items) {
@@ -2982,21 +3179,10 @@
     <p class="text-sm text-muted mt-sm" style="display:none;">Kunde inte ladda bilden. Kontrollera att URL:en \u00e4r korrekt.</p>`;
       }
 
-      function toggleWebSocket() {
-        if (wsConnection) {
-          wsConnection.close();
-          wsConnection = null;
-          updateWsUI("disconnected");
-          return;
-        }
+      function connectWebSocket() {
+        if (wsConnection) return; // already connected
 
         updateWsUI("connecting");
-        const log = document.getElementById("ws-log");
-        log.style.display = "block";
-        log.innerHTML =
-          '<div class="ws-item"><span class="ws-time">' +
-          new Date().toLocaleTimeString("sv-SE") +
-          "</span> Ansluter till wss://mfn.se/all/s/nordic...</div>";
 
         try {
           wsConnection = new WebSocket("wss://mfn.se/all/s/nordic");
@@ -3004,11 +3190,12 @@
           wsConnection.onopen = () => {
             updateWsUI("connected");
             addWsLog("Ansluten!", "var(--green)");
+            document.getElementById("live-indicator").style.display = "";
           };
 
           wsConnection.onmessage = (event) => {
             const data = event.data;
-            // MFN sends HTML fragments — try to extract title
+            // MFN sends HTML fragments — try to extract title and entity
             const titleMatch =
               data.match(/<[^>]*class="[^"]*title[^"]*"[^>]*>([^<]+)/i) ||
               data.match(/<a[^>]*>([^<]{10,})</);
@@ -3016,23 +3203,35 @@
               ? titleMatch[1].trim()
               : "(nytt meddelande)";
             addWsLog(title, "var(--text)");
+
+            // Try to parse as JSON for live feed injection
+            try {
+              const item = JSON.parse(data);
+              if (item && item.news_id) {
+                handleLiveItem(item);
+              }
+            } catch (e) {
+              // HTML fragment — just log it
+            }
           };
 
           wsConnection.onclose = (event) => {
             updateWsUI("disconnected");
+            document.getElementById("live-indicator").style.display = "none";
             addWsLog(
               `Fr\u00e5nkopplad (kod: ${event.code})`,
               "var(--text-muted)",
             );
             wsConnection = null;
-            // Auto-reconnect on server-requested fast reconnect
+            // Auto-reconnect after 5s (or 0.5s if server requested)
+            const delay = event.code === 3000 ? 500 : 5000;
             if (event.code === 3000) {
               addWsLog(
                 "Server beg\u00e4rde snabb \u00e5teranslutning...",
                 "var(--yellow)",
               );
-              setTimeout(toggleWebSocket, 500);
             }
+            setTimeout(connectWebSocket, delay);
           };
 
           wsConnection.onerror = () => {
@@ -3041,6 +3240,46 @@
         } catch (err) {
           updateWsUI("disconnected");
           addWsLog("Kunde inte ansluta: " + err.message, "var(--red)");
+          // Retry in 10s
+          setTimeout(connectWebSocket, 10000);
+        }
+      }
+
+      function toggleWebSocket() {
+        if (wsConnection) {
+          wsConnection.close();
+          wsConnection = null;
+          updateWsUI("disconnected");
+          document.getElementById("live-indicator").style.display = "none";
+        } else {
+          connectWebSocket();
+        }
+      }
+
+      function handleLiveItem(item) {
+        // Check if this item is from a watched company
+        const isWatched =
+          watchedEntityIds.has(item.author?.entity_id) ||
+          watchedSlugs.has(item.author?.slug);
+
+        if (watchedFeedMode && isWatched) {
+          // Check for duplicate
+          if (!allFeedItems.some((i) => i.news_id === item.news_id)) {
+            allFeedItems.unshift(item);
+            applyFilters();
+            // Flash animation on new item
+            requestAnimationFrame(() => {
+              const first = document.querySelector(".news-item");
+              if (first) first.classList.add("news-item-new");
+            });
+          }
+        }
+
+        // Update badge if not viewing feed tab
+        const feedTab = document.getElementById("tab-feed");
+        if (!feedTab?.classList.contains("active") && isWatched) {
+          liveNewItems++;
+          updateFeedBadge();
         }
       }
 
@@ -3048,6 +3287,7 @@
         const dot = document.getElementById("ws-dot");
         const text = document.getElementById("ws-status-text");
         const btn = document.getElementById("ws-connect-btn");
+        if (!dot) return; // tools tab not initialized yet
         dot.className = "ws-dot";
         if (state === "connected") {
           dot.classList.add("connected");
@@ -3066,6 +3306,8 @@
 
       function addWsLog(msg, color) {
         const log = document.getElementById("ws-log");
+        if (!log) return;
+        log.style.display = "block";
         const time = new Date().toLocaleTimeString("sv-SE");
         const div = document.createElement("div");
         div.className = "ws-item";
@@ -3090,6 +3332,9 @@
       // Auto-load watched companies feed on startup
       switchToTab("feed");
       loadWatchedFeed();
+
+      // Auto-connect WebSocket for live updates
+      connectWebSocket();
     </script>
   </body>
 </html>
