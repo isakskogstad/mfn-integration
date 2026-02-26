@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="sv">
   <head>
     <meta charset="UTF-8" />
@@ -42,8 +42,8 @@
       }
 
       body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          sans-serif;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         background: var(--bg);
         color: var(--text);
         line-height: 1.5;
@@ -1837,7 +1837,7 @@
 
       function showEmpty(el, icon, title, desc) {
         el.innerHTML = `<div class="empty-state"><div class="icon">${icon}</div><h3>${esc(
-          title
+          title,
         )}</h3><p>${esc(desc)}</p></div>`;
       }
 
@@ -1873,6 +1873,59 @@
       }
 
       // =============================================================================
+      // CORS PROXY — MFN.se does not send CORS headers
+      // =============================================================================
+      const CORS_PROXIES = [
+        (url) =>
+          `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+        (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+      ];
+      let activeProxyIndex = 0;
+      let useProxy = true;
+
+      async function mfnFetch(url) {
+        // Try direct first (works from localhost / same-origin)
+        if (!useProxy) {
+          try {
+            const direct = await fetch(url, {
+              signal: AbortSignal.timeout(5000),
+            });
+            const text = await direct.text();
+            try {
+              JSON.parse(text);
+            } catch {
+              throw new Error("Not JSON");
+            }
+            return new Response(text, {
+              status: 200,
+              headers: { "content-type": "application/json" },
+            });
+          } catch (e) {
+            useProxy = true;
+          }
+        }
+
+        // Try proxies (allorigins first — verified working)
+        for (let i = 0; i < CORS_PROXIES.length; i++) {
+          const idx = (activeProxyIndex + i) % CORS_PROXIES.length;
+          try {
+            const proxied = await fetch(CORS_PROXIES[idx](url), {
+              signal: AbortSignal.timeout(15000),
+            });
+            if (proxied.ok) {
+              activeProxyIndex = idx;
+              return proxied;
+            }
+          } catch (e) {
+            continue;
+          }
+        }
+        throw new Error(
+          "Kunde inte n\u00e5 MFN.se \u2014 f\u00f6rs\u00f6k igen om en stund",
+        );
+      }
+
+      // =============================================================================
       // TAB 1: COMPANY SEARCH
       // =============================================================================
       const searchInput = document.getElementById("company-search");
@@ -1894,19 +1947,18 @@
         const el = document.getElementById("search-results");
         showLoading(el);
         try {
-          const res = await fetch(
+          const res = await mfnFetch(
             `https://mfn.se/search/companies?limit=10&query=${encodeURIComponent(
-              q
-            )}`
+              q,
+            )}`,
           );
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const companies = await res.json();
           if (!companies.length) {
             showEmpty(
               el,
               "&#128269;",
               "Inga resultat",
-              `Hittade inga bolag f\u00f6r "${q}".`
+              `Hittade inga bolag f\u00f6r "${q}".`,
             );
             return;
           }
@@ -1916,7 +1968,7 @@
               .map((c) => {
                 const logo = c.brand_image_url
                   ? `<img class="company-logo" src="${esc(
-                      c.brand_image_url
+                      c.brand_image_url,
                     )}?size=w-512" alt="" onerror="this.style.display='none'">`
                   : "";
                 const tickers = (c.tickers || [])
@@ -1926,7 +1978,7 @@
                 const isins = (c.isins || [])
                   .map(
                     (i) =>
-                      `<span class="badge badge-muted mono">${esc(i)}</span>`
+                      `<span class="badge badge-muted mono">${esc(i)}</span>`,
                   )
                   .join(" ");
                 const orgs = (c.local_refs || [])
@@ -1934,22 +1986,22 @@
                   .map(
                     (r) =>
                       `<span class="badge badge-purple mono">${esc(
-                        r.replace("SE:", "")
-                      )}</span>`
+                        r.replace("SE:", ""),
+                      )}</span>`,
                   )
                   .join(" ");
                 return `
         <div class="card card-clickable" onclick="selectCompany('${escJs(
-          c.slug
+          c.slug,
         )}', '${escJs(c.name)}')">
           <div class="flex-row" style="gap:16px;">
             ${logo}
             <div style="flex:1;min-width:0;">
               <div style="font-weight:600;font-size:16px;color:var(--text-heading);">${esc(
-                c.name
+                c.name,
               )}</div>
               <div class="text-sm text-muted" style="margin-top:2px;">Slug: <span class="mono">${esc(
-                c.slug
+                c.slug,
               )}</span></div>
               <div class="tag-list mt-sm">${tickers} ${isins} ${orgs}</div>
             </div>
@@ -1978,8 +2030,9 @@
         showLoading(el);
         currentOffset = 0;
         try {
-          const res = await fetch(`https://mfn.se/all/a/${slug}.json?limit=20`);
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const res = await mfnFetch(
+            `https://mfn.se/all/a/${slug}.json?limit=20`,
+          );
           const data = await res.json();
           allFeedItems = data.items || [];
           currentFeedItems = allFeedItems;
@@ -2000,10 +2053,9 @@
         showLoading(el);
         currentOffset = 0;
         try {
-          const res = await fetch(
-            "https://mfn.se/all/s/nordic.json?limit=20&compact=true"
+          const res = await mfnFetch(
+            "https://mfn.se/all/s/nordic.json?limit=20&compact=true",
           );
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const data = await res.json();
           allFeedItems = data.items || [];
           currentFeedItems = allFeedItems;
@@ -2022,8 +2074,7 @@
           ? `https://mfn.se/all/a/${slug}.json?limit=20&offset=${currentOffset}`
           : `https://mfn.se/all/s/nordic.json?limit=20&offset=${currentOffset}&compact=true`;
         try {
-          const res = await fetch(url);
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const res = await mfnFetch(url);
           const data = await res.json();
           const newItems = data.items || [];
           allFeedItems = allFeedItems.concat(newItems);
@@ -2053,7 +2104,7 @@
             el,
             "&#128240;",
             "Inga nyheter",
-            "Inga nyheter att visa med valda filter."
+            "Inga nyheter att visa med valda filter.",
           );
           return;
         }
@@ -2064,8 +2115,8 @@
               .map(
                 (t) =>
                   `<span class="badge ${getTagBadgeClass(t)}">${esc(
-                    t.replace(/^[:]/, "")
-                  )}</span>`
+                    t.replace(/^[:]/, ""),
+                  )}</span>`,
               )
               .join(" ");
             const isReg = (props.tags || []).includes(":regulatory");
@@ -2073,7 +2124,7 @@
             const author = item.author || {};
             const logoHtml = author.brand_image_url
               ? `<img class="company-logo" src="${esc(
-                  author.brand_image_url
+                  author.brand_image_url,
                 )}?size=w-512" alt="" onerror="this.style.display='none'">`
               : "";
             const isExpanded = expandedNewsId === item.news_id;
@@ -2081,8 +2132,8 @@
       <div class="card card-clickable news-item ${
         isReg ? "news-regulatory" : ""
       }" style="margin-bottom:12px;" onclick="toggleNewsItem('${
-              item.news_id
-            }', ${idx})">
+        item.news_id
+      }', ${idx})">
         <div class="news-header">
           ${logoHtml}
           <div style="flex:1;min-width:0;">
@@ -2103,8 +2154,8 @@
           </div>
         </div>
         <div id="news-expand-${item.news_id}" style="display:${
-              isExpanded ? "block" : "none"
-            };">
+          isExpanded ? "block" : "none"
+        };">
           ${isExpanded ? renderExpandedNews(item) : ""}
         </div>
       </div>`;
@@ -2135,15 +2186,15 @@
           try {
             const slug = item.author.slug;
             // Fetch the single news item via the company feed (not compact)
-            const res = await fetch(
+            const res = await mfnFetch(
               `https://mfn.se/all/a/${slug}.json?limit=1&query=${encodeURIComponent(
-                item.title
-              )}`
+                item.title,
+              )}`,
             );
-            if (res.ok) {
+            {
               const data = await res.json();
               const found = (data.items || []).find(
-                (i) => i.news_id === newsId
+                (i) => i.news_id === newsId,
               );
               if (found) {
                 Object.assign(item, found);
@@ -2175,7 +2226,7 @@
           html += `<div class="body-content">${content.html}</div>`;
         } else if (content.text) {
           html += `<div class="body-content" style="white-space:pre-wrap;">${esc(
-            content.text
+            content.text,
           )}</div>`;
         }
 
@@ -2188,9 +2239,9 @@
               ? "&#128196;"
               : "&#128248;";
             html += `<a class="attachment-link" href="${esc(
-              a.url
+              a.url,
             )}" target="_blank" onclick="event.stopPropagation()">${icon} ${esc(
-              a.title || a.url?.split("/").pop() || "Bilaga"
+              a.title || a.url?.split("/").pop() || "Bilaga",
             )}</a>`;
           });
           html += "</div>";
@@ -2230,19 +2281,19 @@
 
         // Strategy 1: mfn-footer mfn-contacts
         const contactFooter = html.match(
-          /<div class="mfn-footer mfn-contacts[^"]*">([\s\S]*?)<\/div>\s*(?:\n<div|$)/
+          /<div class="mfn-footer mfn-contacts[^"]*">([\s\S]*?)<\/div>\s*(?:\n<div|$)/,
         );
         // Strategy 2: generic mfn-footer with hash + contact keywords
         const contactGenericFooter = html.match(
-          /<div class="mfn-footer mfn-[a-f0-9]+">[^]*?(?:CONTACT|kontakta|INFORMATION)[^]*?<\/div>/i
+          /<div class="mfn-footer mfn-[a-f0-9]+">[^]*?(?:CONTACT|kontakta|INFORMATION)[^]*?<\/div>/i,
         );
         // Strategy 3: bare mfn-footer
         const contactBareFooter = html.match(
-          /<div class="mfn-footer">\s*(?:<p>)?\s*(?:<span>)*\s*(?:<span>)*\s*(?:<strong>)?\s*(?:Mediakontakt|Foretagskontakt|Investor Relations|Pressansvarig|Press\s*contact|Media\s*contact|CONTACT|kontakta|INFORMATION)[\s\S]*?<\/div>/i
+          /<div class="mfn-footer">\s*(?:<p>)?\s*(?:<span>)*\s*(?:<span>)*\s*(?:<strong>)?\s*(?:Mediakontakt|Foretagskontakt|Investor Relations|Pressansvarig|Press\s*contact|Media\s*contact|CONTACT|kontakta|INFORMATION)[\s\S]*?<\/div>/i,
         );
         // Strategy 4: inline
         const contactInline = html.match(
-          /<strong[^>]*>(?:<[^>]+>)*[^<]*(?:kontakt[a-z]*|(?:please )?contact)[^]*?<\/strong>(?:<\/p>)?\s*([\s\S]*?)(?:<div class="mfn-footer|<strong[^>]*class="mfn-heading|$)/i
+          /<strong[^>]*>(?:<[^>]+>)*[^<]*(?:kontakt[a-z]*|(?:please )?contact)[^]*?<\/strong>(?:<\/p>)?\s*([\s\S]*?)(?:<div class="mfn-footer|<strong[^>]*class="mfn-heading|$)/i,
         );
 
         const contactSource =
@@ -2263,8 +2314,8 @@
                 l !== "-".repeat(l.length) &&
                 l !== "_".repeat(l.length) &&
                 !/^(?:FOR MORE|For (?:mer|ytterligare|vidare)|KONTAKT|Contact)/i.test(
-                  l
-                )
+                  l,
+                ),
             );
 
           const emailRe = /^(?:E-?mail:\s*)?[\w.+-]+@[\w.-]+\.\w+$/i;
@@ -2332,7 +2383,7 @@
             // Pattern B
             if (
               /^(?:Mediakontakt|Foretagskontakt|Investor Relations|Pressansvarig|Press\s*contact|Media\s*contact|Communications?\s*Department)/i.test(
-                lines[i]
+                lines[i],
               )
             ) {
               const dept = lines[i];
@@ -2362,14 +2413,14 @@
                   !isEmail(lines[j]) &&
                   !isPhone(lines[j]) &&
                   /^(?:CEO|CFO|CTO|COO|VD|VP|Head|Chief|Director|Chef|Kommunikation|Finans)/i.test(
-                    lines[j]
+                    lines[j],
                   )
                 ) {
                   role = lines[j];
                   consumed.add(j);
                 } else if (
                   /^(?:Mediakontakt|Foretagskontakt|Investor|Press)/i.test(
-                    lines[j]
+                    lines[j],
                   )
                 )
                   break;
@@ -2394,7 +2445,7 @@
               const nextLine = lines[i + 1];
               const looksLikeRole =
                 /(?:VD|CEO|CFO|CTO|COO|VP|Head|Chief|Director|Chef|direktör|ansvarig|ordförande|Chairman|Manager|Officer|Investor|Communications|IR\b)/i.test(
-                  nextLine
+                  nextLine,
                 ) &&
                 !isEmail(nextLine) &&
                 !isPhone(nextLine);
@@ -2450,10 +2501,10 @@
         // About Company
         const aboutMatch =
           html.match(
-            /<div class="mfn-footer mfn-about[^"]*">([\s\S]*?)<\/div>/
+            /<div class="mfn-footer mfn-about[^"]*">([\s\S]*?)<\/div>/,
           ) ||
           html.match(
-            /<div class="mfn-footer mfn-[a-f0-9]+">\s*(?:<p>)?\s*(?:<strong[^>]*>)?\s*(?:Om |About )[^]*?<\/div>/i
+            /<div class="mfn-footer mfn-[a-f0-9]+">\s*(?:<p>)?\s*(?:<strong[^>]*>)?\s*(?:Om |About )[^]*?<\/div>/i,
           );
         const aboutCompany = aboutMatch
           ? stripHtml(aboutMatch[1] || aboutMatch[0])
@@ -2461,14 +2512,14 @@
 
         // Regulatory
         const regMatch = html.match(
-          /<div class="mfn-footer mfn-regulatory[^"]*">([\s\S]*?)<\/div>/
+          /<div class="mfn-footer mfn-regulatory[^"]*">([\s\S]*?)<\/div>/,
         );
         const regulatoryDisclosure = regMatch ? stripHtml(regMatch[1]) : null;
 
         // Certified Adviser
         const text = stripHtml(html);
         const caMatch = text.match(
-          /Certified Adviser[:\s]*\n(.*?)(?=\n\n|Om |About |$)/is
+          /Certified Adviser[:\s]*\n(.*?)(?=\n\n|Om |About |$)/is,
         );
         const certifiedAdviser = caMatch ? caMatch[1].trim() : null;
 
@@ -2481,7 +2532,7 @@
           const heading = headingParts[i].substring(0, endTag).trim();
           const rest = headingParts[i].substring(endTag);
           const sectionEnd = rest.search(
-            /<strong class="mfn-heading|<div class="mfn-footer/
+            /<strong class="mfn-heading|<div class="mfn-footer/,
           );
           const sectionHtml =
             sectionEnd > 0 ? rest.substring(0, sectionEnd) : rest;
@@ -2509,7 +2560,7 @@
       <div class="card mb">
         <h3>${esc(item.title)}</h3>
         <p class="text-sm text-muted mt-sm">${esc(
-          item.author?.name || ""
+          item.author?.name || "",
         )} — ${formatDate(item.published)}</p>
       </div>
       <div class="error-msg">Denna nyhet saknar HTML-inneh\u00e5ll. Kontaktextraktion kr\u00e4ver fullst\u00e4ndig HTML.</div>`;
@@ -2522,7 +2573,7 @@
     <div class="card mb">
       <h3>${esc(item.title)}</h3>
       <p class="text-sm text-muted mt-sm">${esc(
-        item.author?.name || ""
+        item.author?.name || "",
       )} — ${formatDate(item.published)}</p>
     </div>`;
 
@@ -2537,7 +2588,7 @@
         ${
           c.email
             ? `<div class="contact-detail"><a href="mailto:${esc(
-                c.email
+                c.email,
               )}">${esc(c.email)}</a></div>`
             : ""
         }
@@ -2555,7 +2606,7 @@
           html +=
             '<h3 style="margin:20px 0 12px;">Regulatorisk information</h3>';
           html += `<div class="section-block" style="border-left-color:var(--yellow);"><p>${esc(
-            extracted.regulatoryDisclosure
+            extracted.regulatoryDisclosure,
           )}</p></div>`;
         }
 
@@ -2563,7 +2614,7 @@
         if (extracted.certifiedAdviser) {
           html += '<h3 style="margin:20px 0 12px;">Certified Adviser</h3>';
           html += `<div class="section-block" style="border-left-color:var(--green);"><p>${esc(
-            extracted.certifiedAdviser
+            extracted.certifiedAdviser,
           )}</p></div>`;
         }
 
@@ -2571,7 +2622,7 @@
         if (extracted.aboutCompany) {
           html += '<h3 style="margin:20px 0 12px;">Om bolaget</h3>';
           html += `<div class="section-block" style="border-left-color:var(--accent);"><p>${esc(
-            extracted.aboutCompany
+            extracted.aboutCompany,
           )}</p></div>`;
         }
 
@@ -2580,7 +2631,7 @@
           html += '<h3 style="margin:20px 0 12px;">Sektioner</h3>';
           extracted.sections.forEach((s) => {
             html += `<div class="section-block"><h4>${esc(
-              s.heading
+              s.heading,
             )}</h4><p>${esc(s.text)}</p></div>`;
           });
         }
@@ -2621,12 +2672,12 @@
               m.mfn_name.toLowerCase().includes(q) ||
               m.orgNumber.includes(q) ||
               m.mfn_slug.includes(q) ||
-              (m.mfn_tickers || []).some((t) => t.toLowerCase().includes(q))
+              (m.mfn_tickers || []).some((t) => t.toLowerCase().includes(q)),
           );
         }
         if (ex) {
           filtered = filtered.filter((m) =>
-            (m.mfn_tickers || []).some((t) => t.startsWith(ex + ":"))
+            (m.mfn_tickers || []).some((t) => t.startsWith(ex + ":")),
           );
         }
         if (src) {
@@ -2646,11 +2697,11 @@
                 (s) =>
                   `<span class="badge ${
                     s === "FamilyOffice" ? "badge-purple" : "badge-muted"
-                  }">${esc(s)}</span>`
+                  }">${esc(s)}</span>`,
               )
               .join(" ");
             return `<tr onclick="selectCompany('${escJs(m.mfn_slug)}', '${escJs(
-              m.mfn_name
+              m.mfn_name,
             )}')">
       <td><strong>${esc(m.db_name)}</strong></td>
       <td>${esc(m.mfn_name)}</td>
@@ -2658,8 +2709,8 @@
       <td>${tickers}</td>
       <td class="mono text-sm">${esc(m.orgNumber)}</td>
       <td><span class="badge ${getMatchTypeBadge(m.match_type)}">${esc(
-              m.match_type
-            )}${m.fuzzy_score ? ` (${m.fuzzy_score})` : ""}</span></td>
+        m.match_type,
+      )}${m.fuzzy_score ? ` (${m.fuzzy_score})` : ""}</span></td>
       <td>${sources}</td>
     </tr>`;
           })
@@ -2676,10 +2727,9 @@
           '<div class="spinner" style="width:16px;height:16px;border-width:2px;"></div> H\u00e4mtar...';
         const statsEl = document.getElementById("entity-stats");
         try {
-          const res = await fetch(
-            "https://mfn.se/search/companies?query=&limit=2000"
+          const res = await mfnFetch(
+            "https://mfn.se/search/companies?query=&limit=5000",
           );
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const entities = await res.json();
 
           // Compute stats
@@ -2718,15 +2768,15 @@
           .map(
             ([ex, count]) =>
               `<div class="stat-card"><div class="stat-value" style="font-size:22px;">${count}</div><div class="stat-label">${esc(
-                ex
-              )}</div></div>`
+                ex,
+              )}</div></div>`,
           )
           .join("")}
       </div>`;
         } catch (err) {
           statsEl.style.display = "block";
           statsEl.innerHTML = `<div class="error-msg">${esc(
-            err.message
+            err.message,
           )}</div>`;
         } finally {
           btn.disabled = false;
@@ -2755,12 +2805,12 @@
             .map(
               (u) =>
                 `<div class="url-output"><a href="${esc(
-                  u.url
+                  u.url,
                 )}" target="_blank">${esc(u.label)}: ${esc(
-                  u.url
+                  u.url,
                 )}</a><button class="btn btn-sm btn-secondary" onclick="navigator.clipboard.writeText('${esc(
-                  u.url
-                )}');this.textContent='Kopierad!';setTimeout(()=>this.textContent='Kopiera',1500)">Kopiera</button></div>`
+                  u.url,
+                )}');this.textContent='Kopierad!';setTimeout(()=>this.textContent='Kopiera',1500)">Kopiera</button></div>`,
             )
             .join("") +
           "</div>";
@@ -2780,11 +2830,11 @@
     <div class="url-output mt">
       <a href="${esc(finalUrl)}" target="_blank">${esc(finalUrl)}</a>
       <button class="btn btn-sm btn-secondary" onclick="navigator.clipboard.writeText('${esc(
-        finalUrl
+        finalUrl,
       )}');this.textContent='Kopierad!';setTimeout(()=>this.textContent='Kopiera',1500)">Kopiera</button>
     </div>
     <img class="image-preview" src="${esc(
-      finalUrl
+      finalUrl,
     )}" alt="Forhandsgranskning" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
     <p class="text-sm text-muted mt-sm" style="display:none;">Kunde inte ladda bilden. Kontrollera att URL:en \u00e4r korrekt.</p>`;
       }
@@ -2829,14 +2879,14 @@
             updateWsUI("disconnected");
             addWsLog(
               `Fr\u00e5nkopplad (kod: ${event.code})`,
-              "var(--text-muted)"
+              "var(--text-muted)",
             );
             wsConnection = null;
             // Auto-reconnect on server-requested fast reconnect
             if (event.code === 3000) {
               addWsLog(
                 "Server beg\u00e4rde snabb \u00e5teranslutning...",
-                "var(--yellow)"
+                "var(--yellow)",
               );
               setTimeout(toggleWebSocket, 500);
             }
@@ -2877,7 +2927,7 @@
         const div = document.createElement("div");
         div.className = "ws-item";
         div.innerHTML = `<span class="ws-time">${time}</span> <span class="ws-title" style="color:${color}">${esc(
-          msg
+          msg,
         )}</span>`;
         log.insertBefore(div, log.firstChild);
         // Cap at 100 entries
