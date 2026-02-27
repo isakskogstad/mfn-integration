@@ -68,6 +68,110 @@ const WATCHED_SLUGS = [
   "xoma",
 ];
 
+// Keywords to watch — catches mentions in press releases from ANY company
+// Useful for investment companies whose portfolio holdings publish news elsewhere
+// Keywords from FamilyOffice + VCCompany tables in Supabase
+// Catches mentions of these companies in press releases from ANY Nordic company
+const WATCHED_KEYWORDS = [
+  // FamilyOffice
+  "41an Invest",
+  "Abraxas Holding",
+  "ACACIA",
+  "Active Invest",
+  "Alsteron",
+  "AltoCumulus",
+  "AxSol",
+  "Backahill",
+  "Beijerinvest",
+  "Bonnier Ventures",
+  "Briban Invest",
+  "Bure Equity",
+  "Byggmästare AJ Ahlström",
+  "Carl Bennet",
+  "Creades",
+  "Curus",
+  "Danir",
+  "EKO-Gruppen",
+  "Ernström",
+  "FAM AB",
+  "Ferd",
+  "Flat Capital",
+  "Flerie Invest",
+  "Formica Capital",
+  "Fort Knox Förvaltning",
+  "Frankenius Equity",
+  "Gozal Invest",
+  "Granitor",
+  "Gullspång Invest",
+  "Haflo",
+  "Inbox Capital",
+  "Ingka Investments",
+  "JCE Group",
+  "Jula Holding",
+  "Kempestiftelserna",
+  "Knil AB",
+  "Latour",
+  "Leksell Social Ventures",
+  "Linc",
+  "Lindéngruppen",
+  "Löfberg Invest",
+  "Lyko Group",
+  "Max Burgers",
+  "Medicon Village",
+  "Mellby Gård",
+  "Neptunia Invest",
+  "Nolsterby Invest",
+  "Nordstjernan",
+  "Norrsken Foundation",
+  "Novax",
+  "Öresund",
+  "Philian",
+  "Profura",
+  "Qarlbo",
+  "R12 Kapital",
+  "Rite Ventures",
+  "RoosGruppen",
+  "Salénia",
+  "Sandberg Development",
+  "Sätila Impact",
+  "Skoogs",
+  "Sobro",
+  "Spiltan",
+  "Stena Adactum",
+  "Stena Sessan",
+  "Svolder",
+  "Swedia Capital",
+  "Tetra Laval",
+  "Traction",
+  "Vera Invest",
+  "Walerud Ventures",
+  "Wellstreet",
+  "Zenith",
+  // VCCompany
+  "Alder",
+  "Alliance Ventures",
+  "Almi Invest Greentech",
+  "Amplio Private Equity",
+  "Annexstruktur",
+  "Byfounders",
+  "Chalmers Ventures",
+  "Course Corrected",
+  "Curitas Ventures",
+  "E14 Invest",
+  "Eir Ventures",
+  "EIT Urban Mobility",
+  "Fairpoint Capital",
+  "First Venture",
+  "Fundforward",
+  "Gullspång Re:food",
+  "Industrifonden",
+  "InnoEnergy",
+  "Inventure",
+  "Kale United",
+  "Klimatet Invest",
+  "Klint Ventures",
+];
+
 const TAG_LABELS = {
   ":regulatory": "Regulatorisk",
   ":regulatory:mar": "MAR",
@@ -126,7 +230,7 @@ async function fetchMFNItems() {
     const batch = WATCHED_SLUGS.slice(i, i + batchSize);
     const results = await Promise.allSettled(
       batch.map(async (slug) => {
-        const url = `https://mfn.se/all/a/${slug}.json?limit=20&compact=true`;
+        const url = `https://mfn.se/all/a/${slug}.json?limit=50&compact=true`;
         const res = await fetch(url);
         if (!res.ok) return [];
         const data = await res.json();
@@ -149,6 +253,40 @@ async function fetchMFNItems() {
     );
   }
 
+  // Fetch keyword search results (catches mentions across ALL companies)
+  if (WATCHED_KEYWORDS.length > 0) {
+    const kwBatchSize = 5;
+    for (let i = 0; i < WATCHED_KEYWORDS.length; i += kwBatchSize) {
+      const batch = WATCHED_KEYWORDS.slice(i, i + kwBatchSize);
+      const results = await Promise.allSettled(
+        batch.map(async (keyword) => {
+          const url = `https://mfn.se/all/s/nordic.json?query=${encodeURIComponent(keyword)}&limit=30&compact=true`;
+          const res = await fetch(url);
+          if (!res.ok) return [];
+          const data = await res.json();
+          return (data.items || []).map((item) => ({
+            ...item,
+            _matchedKeyword: keyword,
+          }));
+        }),
+      );
+      for (const r of results) {
+        if (r.status !== "fulfilled") continue;
+        for (const item of r.value) {
+          const key =
+            (item.news_id || "") + "::" + (item.content?.publish_date || "");
+          if (!dedup.has(key)) {
+            dedup.add(key);
+            allItems.push(item);
+          }
+        }
+      }
+      console.error(
+        `Keyword batch ${Math.floor(i / kwBatchSize) + 1}/${Math.ceil(WATCHED_KEYWORDS.length / kwBatchSize)} (${allItems.length} items total)`,
+      );
+    }
+  }
+
   // Sort by date descending
   allItems.sort((a, b) => {
     const da = new Date(a.content?.publish_date || 0);
@@ -157,7 +295,7 @@ async function fetchMFNItems() {
   });
 
   console.error(
-    `Total: ${allItems.length} unique items from ${WATCHED_SLUGS.length} companies`,
+    `Total: ${allItems.length} unique items from ${WATCHED_SLUGS.length} companies + ${WATCHED_KEYWORDS.length} keywords`,
   );
   return allItems;
 }
@@ -170,10 +308,10 @@ function buildICS(items) {
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
     "X-WR-CALNAME:MFN Bevakade Bolag",
-    "X-WR-CALDESC:Pressmeddelanden från bevakade bolag på MFN.se",
-    // Refresh interval: 30 minutes (for calendar apps that support it)
-    "REFRESH-INTERVAL;VALUE=DURATION:PT30M",
-    "X-PUBLISHED-TTL:PT30M",
+    "X-WR-CALDESC:Alla händelser från bevakade bolag på MFN.se",
+    // Refresh interval: 15 minutes (for calendar apps that support it)
+    "REFRESH-INTERVAL;VALUE=DURATION:PT15M",
+    "X-PUBLISHED-TTL:PT15M",
   ];
 
   for (const item of items) {
@@ -192,6 +330,8 @@ function buildICS(items) {
 
     let desc = "";
     if (company) desc += company + "\\n\\n";
+    if (item._matchedKeyword)
+      desc += "Sökord: " + icsEscape(item._matchedKeyword) + "\\n\\n";
     if (preamble) desc += icsEscape(preamble) + "\\n\\n";
     if (tags) desc += "Taggar: " + icsEscape(tags) + "\\n";
     if (url) desc += "\\nLäs mer: " + url;

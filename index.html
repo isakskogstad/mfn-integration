@@ -1389,6 +1389,64 @@
             "
           />
         </div>
+        <!-- Calendar subscription bar -->
+        <div
+          id="subscribe-bar"
+          style="
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            margin-bottom: 10px;
+            background: rgba(88, 166, 255, 0.06);
+            border: 1px solid rgba(88, 166, 255, 0.18);
+            border-radius: var(--radius);
+            font-size: 0.8rem;
+            flex-wrap: wrap;
+          "
+        >
+          <span style="color: var(--text-muted); white-space: nowrap"
+            >&#128197; Prenumerera p&aring; alla h&auml;ndelser:</span
+          >
+          <button
+            class="btn btn-sm"
+            onclick="openAppleCalSubscribe()"
+            style="
+              font-size: 11px;
+              padding: 4px 10px;
+              background: var(--accent);
+              color: #fff;
+            "
+          >
+            Apple / webcal
+          </button>
+          <button
+            class="btn btn-sm btn-secondary"
+            onclick="openGoogleCalSubscribe()"
+            style="font-size: 11px; padding: 4px 10px"
+          >
+            Google
+          </button>
+          <button
+            class="btn btn-sm btn-secondary"
+            onclick="openOutlookCalSubscribe()"
+            style="font-size: 11px; padding: 4px 10px"
+          >
+            Outlook
+          </button>
+          <button
+            class="btn btn-sm btn-secondary"
+            onclick="copyWebcalUrl()"
+            style="font-size: 11px; padding: 4px 10px"
+            title="Kopiera webcal-l&auml;nk"
+          >
+            &#128279; Kopiera l&auml;nk
+          </button>
+          <span
+            id="subscribe-bar-status"
+            style="color: var(--green); font-size: 11px; margin-left: auto"
+          ></span>
+        </div>
         <div
           style="
             display: flex;
@@ -1531,8 +1589,8 @@
                 margin: 0 0 12px;
               "
             >
-              Prenumerera p&aring; pressmeddelanden fr&aring;n 62 bevakade
-              bolag. Kalendern uppdateras automatiskt var 30:e minut.
+              Prenumerera p&aring; alla h&auml;ndelser fr&aring;n 62 bevakade
+              bolag. Kalendern uppdateras automatiskt var 15:e minut.
             </p>
             <div
               style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px"
@@ -2895,11 +2953,144 @@
       let watchedFeedMode = false;
       let watchedOffset = 0;
 
+      // Keywords to watch — catches mentions across ALL companies
+      // Keywords from FamilyOffice + VCCompany tables
+      const WATCHED_KEYWORDS = [
+        // FamilyOffice
+        "41an Invest",
+        "Abraxas Holding",
+        "ACACIA",
+        "Active Invest",
+        "Alsteron",
+        "AltoCumulus",
+        "AxSol",
+        "Backahill",
+        "Beijerinvest",
+        "Bonnier Ventures",
+        "Briban Invest",
+        "Bure Equity",
+        "Byggm\u00e4stare AJ Ahlstr\u00f6m",
+        "Carl Bennet",
+        "Creades",
+        "Curus",
+        "Danir",
+        "EKO-Gruppen",
+        "Ernstr\u00f6m",
+        "FAM AB",
+        "Ferd",
+        "Flat Capital",
+        "Flerie Invest",
+        "Formica Capital",
+        "Fort Knox F\u00f6rvaltning",
+        "Frankenius Equity",
+        "Gozal Invest",
+        "Granitor",
+        "Gullsp\u00e5ng Invest",
+        "Haflo",
+        "Inbox Capital",
+        "Ingka Investments",
+        "JCE Group",
+        "Jula Holding",
+        "Kempestiftelserna",
+        "Knil AB",
+        "Latour",
+        "Leksell Social Ventures",
+        "Linc",
+        "Lind\u00e9ngruppen",
+        "L\u00f6fberg Invest",
+        "Lyko Group",
+        "Max Burgers",
+        "Medicon Village",
+        "Mellby G\u00e5rd",
+        "Neptunia Invest",
+        "Nolsterby Invest",
+        "Nordstjernan",
+        "Norrsken Foundation",
+        "Novax",
+        "\u00d6resund",
+        "Philian",
+        "Profura",
+        "Qarlbo",
+        "R12 Kapital",
+        "Rite Ventures",
+        "RoosGruppen",
+        "Sal\u00e9nia",
+        "Sandberg Development",
+        "S\u00e4tila Impact",
+        "Skoogs",
+        "Sobro",
+        "Spiltan",
+        "Stena Adactum",
+        "Stena Sessan",
+        "Svolder",
+        "Swedia Capital",
+        "Tetra Laval",
+        "Traction",
+        "Vera Invest",
+        "Walerud Ventures",
+        "Wellstreet",
+        "Zenith",
+        // VCCompany
+        "Alder",
+        "Alliance Ventures",
+        "Almi Invest Greentech",
+        "Amplio Private Equity",
+        "Annexstruktur",
+        "Byfounders",
+        "Chalmers Ventures",
+        "Course Corrected",
+        "Curitas Ventures",
+        "E14 Invest",
+        "Eir Ventures",
+        "EIT Urban Mobility",
+        "Fairpoint Capital",
+        "First Venture",
+        "Fundforward",
+        "Gullsp\u00e5ng Re:food",
+        "Industrifonden",
+        "InnoEnergy",
+        "Inventure",
+        "Kale United",
+        "Klimatet Invest",
+        "Klint Ventures",
+      ];
+
+      async function fetchKeywordItems() {
+        const dedup = new Set(allFeedItems.map((i) => i.news_id));
+        const keywordItems = [];
+        const results = await Promise.allSettled(
+          WATCHED_KEYWORDS.map(async (kw) => {
+            const res = await mfnFetch(
+              `https://mfn.se/all/s/nordic.json?query=${encodeURIComponent(kw)}&limit=20&compact=true`,
+            );
+            const data = await res.json();
+            return (data.items || []).map((item) => ({
+              ...item,
+              _matchedKeyword: kw,
+            }));
+          }),
+        );
+        for (const r of results) {
+          if (r.status !== "fulfilled") continue;
+          for (const item of r.value) {
+            if (!dedup.has(item.news_id)) {
+              dedup.add(item.news_id);
+              keywordItems.push(item);
+            }
+          }
+        }
+        return keywordItems;
+      }
+
       async function loadWatchedFeed() {
         watchedFeedMode = true;
         currentFeedSlug = null;
         document.getElementById("feed-title").textContent =
-          "\u2605 Bevakade bolag (" + MFN_MATCHES.length + " st)";
+          "\u2605 Bevakade bolag (" +
+          MFN_MATCHES.length +
+          " st) + " +
+          WATCHED_KEYWORDS.length +
+          " s\u00f6kord";
         const el = document.getElementById("feed-results");
 
         // Show cached data instantly while fetching fresh
@@ -2916,6 +3107,12 @@
         watchedOffset = 0;
         try {
           await fetchWatchedBatch(el, 30);
+          // Also fetch keyword matches
+          const kwItems = await fetchKeywordItems();
+          if (kwItems.length > 0) {
+            allFeedItems = allFeedItems.concat(kwItems);
+            applyFilters();
+          }
         } catch (err) {
           if (!cached || cached.length === 0) {
             showError(
@@ -2974,34 +3171,57 @@
         }
       }
 
+      let isLoadingMore = false;
       async function loadMoreNews() {
-        if (watchedFeedMode) {
-          const el = document.getElementById("feed-results");
-          const prevCount = allFeedItems.length;
-          try {
-            await fetchWatchedBatch(el, allFeedItems.length + 20);
-            if (allFeedItems.length === prevCount)
-              document.getElementById("load-more-btn").style.display = "none";
-          } catch (err) {
-            console.error("Load more error:", err);
-          }
-          return;
-        }
-        const slug = currentFeedSlug;
-        const url = slug
-          ? `https://mfn.se/all/a/${slug}.json?limit=20&compact=true&offset=${currentOffset}`
-          : `https://mfn.se/all/s/nordic.json?limit=20&compact=true&offset=${currentOffset}`;
+        if (isLoadingMore) return;
+        isLoadingMore = true;
+        const btn = document.getElementById("load-more-btn");
+        if (btn) btn.textContent = "Laddar\u2026";
         try {
-          const res = await mfnFetch(url);
-          const data = await res.json();
-          const newItems = data.items || [];
-          allFeedItems = allFeedItems.concat(newItems);
-          currentOffset += newItems.length;
-          if (newItems.length < 20)
-            document.getElementById("load-more-btn").style.display = "none";
-          applyFilters();
+          if (watchedFeedMode) {
+            const el = document.getElementById("feed-results");
+            const prevCount = allFeedItems.length;
+            await fetchWatchedBatch(el, allFeedItems.length + 20);
+            if (allFeedItems.length === prevCount) btn.style.display = "none";
+          } else {
+            const slug = currentFeedSlug;
+            const url = slug
+              ? `https://mfn.se/all/a/${slug}.json?limit=20&compact=true&offset=${currentOffset}`
+              : `https://mfn.se/all/s/nordic.json?limit=20&compact=true&offset=${currentOffset}`;
+            const res = await mfnFetch(url);
+            const data = await res.json();
+            const newItems = data.items || [];
+            allFeedItems = allFeedItems.concat(newItems);
+            currentOffset += newItems.length;
+            if (newItems.length < 20) btn.style.display = "none";
+            applyFilters();
+          }
         } catch (err) {
           console.error("Load more error:", err);
+        } finally {
+          isLoadingMore = false;
+          if (btn) btn.textContent = "Ladda fler";
+        }
+      }
+
+      // Infinite scroll — auto-load when "Ladda fler" button enters viewport
+      {
+        const loadMoreBtn = document.getElementById("load-more-btn");
+        if (loadMoreBtn && "IntersectionObserver" in window) {
+          const observer = new IntersectionObserver(
+            (entries) => {
+              for (const entry of entries) {
+                if (
+                  entry.isIntersecting &&
+                  loadMoreBtn.style.display !== "none"
+                ) {
+                  loadMoreNews();
+                }
+              }
+            },
+            { rootMargin: "200px" },
+          );
+          observer.observe(loadMoreBtn);
         }
       }
 
@@ -3076,8 +3296,8 @@
           });
         }
 
-        // Deduplicate sv/en pairs — prefer Swedish version
-        if (!lang) {
+        // Deduplicate sv/en pairs — always prefer Swedish version, fall back to English
+        {
           const groups = new Map();
           for (const item of items) {
             const eid = item.author?.entity_id || "";
@@ -3087,6 +3307,7 @@
             if (!existing) {
               groups.set(key, item);
             } else {
+              // Replace if current is Swedish and existing is not
               if (
                 item.properties?.lang === "sv" &&
                 existing.properties?.lang !== "sv"
@@ -3209,6 +3430,7 @@
               <span class="news-date">${formatRelativeDate(pubDate)}</span>
               <span class="badge ${lang === "sv" ? "badge-blue" : "badge-green"}">${esc(lang.toUpperCase())}</span>
               ${isReg ? '<span class="badge badge-yellow">REGULATORISK</span>' : ""}
+              ${item._matchedKeyword ? `<span class="badge badge-purple" title="Matchat s\u00f6kord">\u{1F50D} ${esc(item._matchedKeyword)}</span>` : ""}
               ${tags}
               ${attBadge}
             </div>
@@ -4035,7 +4257,7 @@
         window.open(gcalUrl, "_blank");
         setCalendarStatus(
           "Google Calendar prenumeration \u00f6ppnades.<br>" +
-            '<span style="opacity:0.7;">Kalendern uppdateras automatiskt var 30:e minut med nya h\u00e4ndelser.</span>',
+            '<span style="opacity:0.7;">Kalendern uppdateras automatiskt var 15:e minut med nya h\u00e4ndelser.</span>',
         );
       }
 
@@ -4066,6 +4288,16 @@
         const el = document.getElementById("calendar-status");
         el.innerHTML = html;
         el.style.color = isError ? "var(--danger)" : "var(--text-muted)";
+        // Also show brief status in the subscribe bar
+        const barStatus = document.getElementById("subscribe-bar-status");
+        if (barStatus) {
+          const plain = html.replace(/<[^>]*>/g, "").substring(0, 60);
+          barStatus.textContent = plain;
+          clearTimeout(barStatus._timer);
+          barStatus._timer = setTimeout(() => {
+            barStatus.textContent = "";
+          }, 5000);
+        }
       }
 
       function generateFeedUrls() {
